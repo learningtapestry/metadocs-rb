@@ -1,0 +1,311 @@
+# frozen_string_literal: true
+
+require 'hashie'
+require_relative 'google_document'
+require_relative 'source_map'
+require_relative 'bbdocs'
+require_relative 'elements'
+require_relative 'paragraph_ranges'
+require_relative 'text_renderer'
+
+module Metadocs
+  class Parser
+    DEFAULT_RENDERERS = {
+      text: Metadocs::TextRenderer
+    }.freeze
+
+    attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :result,
+                :metadata, :metadata_tables, :renderers
+
+    def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: DEFAULT_RENDERERS)
+      @google_document = google_document
+      @tags = tags
+      @empty_tags = empty_tags
+      @metadata = {}
+      @metadata_tables = metadata_tables
+      @images = {}
+      @renderers = renderers
+
+      (google_document.inline_objects || []).each do |id, object|
+        properties = object.inline_object_properties.embedded_object
+        next unless properties.image_properties
+
+        images[id] = Hashie::Mash.new({
+                                        inline_object: object,
+                                        title: properties.title,
+                                        description: properties.description,
+                                        content_uri: properties.image_properties.content_uri,
+                                        source_uri: properties.image_properties.source_uri
+                                      })
+      end
+
+      (google_document.positioned_objects || []).each do |id, object|
+        properties = object.positioned_object_properties.embedded_object
+        next unless properties.image_properties
+
+        images[id] = Hashie::Mash.new({
+                                        inline_object: object,
+                                        title: properties.title,
+                                        description: properties.description,
+                                        content_uri: properties.image_properties.content_uri,
+                                        source_uri: properties.image_properties.source_uri
+                                      })
+      end
+    end
+
+    def self.parse(google_authorization, doc_id, tags: [], empty_tags: [], metadata_tables: [], renderers: [])
+      document = Metadocs::GoogleDocument.new(google_authorization, doc_id)
+      parser = new(
+        document.document,
+        tags: tags,
+        empty_tags: empty_tags,
+        metadata_tables: metadata_tables,
+        renderers: renderers
+      )
+      parser.parse
+      parser
+    end
+
+    def parse
+      @source_map = Metadocs::SourceMap.new(google_document)
+      @bbdocs = Metadocs::Bbdocs.new(
+        tags: tag_names,
+        empty_tags: empty_tag_names,
+        ignore_tags: metadata_table_names
+      )
+
+      source_map.generate
+
+      @ranges = ParagraphRanges.new(source_map)
+      @result = Elements::Body.with_renderers(
+        renderers,
+        children: walk_ast(source_map.body, bbdocs.parse(source_map.body.source))
+      )
+    end
+
+    protected
+
+    attr_reader :ranges
+
+    def tag_names
+      @tag_names ||= tags.map { |t| t[:name] }
+    end
+
+    def empty_tag_names
+      @empty_tag_names ||= empty_tags.map { |t| t[:name] }
+    end
+
+    def metadata_table_names
+      @metadata_table_names ||= metadata_tables.map { |mtt| mtt[:name] }
+    end
+
+    def walk_ast(mapping, ast)
+      children = []
+      ast.each do |node|
+        if node[:tag] || node[:empty_tag]
+          tag = parse_tag(mapping, node)
+          if tag
+            tag.structural_element = find_tag_structural_element(mapping, node)
+            children << tag
+          end
+        elsif node[:reference]
+          reference = parse_reference(mapping, node)
+          children << reference if reference
+        elsif node[:text]
+          struct_paragraphs = parse_text(mapping, node).group_by { |(struct, _paragraph)| struct }
+          struct_paragraphs.each do |struct_paragraph, paragraph_elements|
+            texts = paragraph_elements.map { |p| p[1..] }.flatten
+            paragraph = Elements::Paragraph.with_renderers(
+              renderers,
+              children: texts
+            )
+            paragraph.structural_element = struct_paragraph
+            children << paragraph
+          end
+        end
+      end
+
+      merge_paragraphs(children)
+    end
+
+    def find_tag_structural_element(mapping, node)
+      tag = node[:tag]
+      if tag[:empty_tag]
+        tag_name = tag[:empty_tag][:name]
+        start_at = tag_name.offset
+        end_at = start_at + tag_name.length
+      else
+        tag_name = tag[:start_tag][:name]
+        start_at = tag_name.offset
+        end_at = tag[:end_tag][:name].offset + tag[:end_tag][:name].length
+      end
+      start_at_range = ranges.find_paragraph(mapping.element, start_at)
+      end_at_range = ranges.find_paragraph(mapping.element, end_at)
+
+      return start_at_range[0] if start_at_range[0] == end_at_range[0]
+    end
+
+    def parse_tag(mapping, node)
+      tag = node[:tag]
+      open_tag = tag[:start_tag] || tag[:empty_tag]
+      name = open_tag[:name].str
+      children = tag[:children] ? walk_ast(mapping, tag[:children]) : []
+      attributes = nil
+      if open_tag[:attributes]&.any?
+        attributes = {}
+        open_tag[:attributes].each do |attr|
+          attributes[attr[:name].str] = attr[:value].str
+        end
+      end
+
+      if name == 'equation'
+        raise ArgumentError, 'Invalid equation' unless children.any? && children.all do |c|
+          c.is_a?(Elements::Text)
+        end
+
+        Elements::Equation.with_renderers(renderers, value: children.map(&:value).join)
+      else
+        Elements::Tag.with_renderers(
+          renderers,
+          name: name,
+          children: children,
+          attributes: Hashie::Mash.new(attributes),
+          qualifier: open_tag[:qualifier]&.str,
+          empty: tag[:empty_tag] ? true : false
+        )
+      end
+    end
+
+    def parse_reference(mapping, node)
+      reference_mapping = source_map[node[:reference][:value].str]
+      case reference_mapping.type
+      when :paragraph_element
+        return parse_paragraph_reference(mapping, reference_mapping, node)
+      when :table
+        return parse_table_reference(mapping, reference_mapping, node)
+      end
+
+      nil
+    end
+
+    def parse_paragraph_reference(_mapping, reference_mapping, _node)
+      paragraph_element = reference_mapping.paragraph_element
+      return unless paragraph_element.inline_object_element
+
+      id = paragraph_element.inline_object_element.inline_object_id
+      image = images[id]
+
+      return nil unless image
+
+      Elements::Image.with_renderers(
+        renderers,
+        id: id,
+        content_uri: image.content_uri,
+        source_uri: image.source_uri
+      )
+    end
+
+    def parse_table_reference(_mapping, reference_mapping, _node)
+      table = Elements::Table.with_renderers(renderers)
+
+      reference_mapping.table_rows.each do |cell_ids|
+        row = Elements::TableRow.with_renderers(renderers)
+        table.rows << row
+        cell_ids.each do |cell_id|
+          cell = Elements::TableCell.with_renderers(renderers)
+          row.cells << cell
+
+          cell_mapping = source_map[cell_id]
+          cell_bbdocs = Metadocs::Bbdocs.new(
+            tags: tag_names,
+            empty_tags: empty_tag_names,
+            ignore_tags: metadata_table_names
+          )
+          cell.children = walk_ast(cell_mapping, cell_bbdocs.parse(cell_mapping.source))
+        end
+      end
+
+      metadata_tables.each do |mtt|
+        metadata_table = Elements::MetadataTable.with_renderers(
+          renderers,
+          table: table,
+          name: mtt[:name],
+          type: mtt[:type]
+        )
+        next unless metadata_table.valid?
+
+        metadata[metadata_table.name] ||= []
+        metadata[metadata_table.name] << metadata_table
+        return metadata_table
+      end
+
+      table
+    end
+
+    def parse_text(mapping, node)
+      full_text = node[:text].str
+      paragraphs = ranges.find_paragraphs(mapping.element, node[:text].offset, full_text)
+      paragraphs.map do |(structural_element, paragraph_element, text)|
+        [
+          structural_element,
+          Elements::Text.with_renderers(
+            renderers,
+            value: text,
+            bold: paragraph_element.text_run.text_style.bold ? true : false,
+            italic: paragraph_element.text_run.text_style.italic ? true : false,
+            underline: paragraph_element.text_run.text_style.underline ? true : false,
+            strikethrough: paragraph_element.text_run.text_style.strikethrough ? true : false
+          )
+        ]
+      end
+    end
+
+    # Merge tags and paragraphs.
+    def merge_paragraphs(children)
+      merged_children = []
+
+      # Accumulate all children that belong to the same structural element
+      struct_children = {}
+      children.each_with_index do |child, idx|
+        key = child.structural_element || idx
+        struct_children[key] ||= []
+        struct_children[key] << child
+      end
+
+      struct_children.each do |key, key_children|
+        if key.is_a?(Numeric)
+          # Append unrelated children
+          merged_children.push(*key_children)
+        else
+          # Merge related children
+          parent_paragraph_idx = key_children.index { |c| c.is_a?(Elements::Paragraph) }
+          parent_paragraph = key_children[parent_paragraph_idx]
+          if parent_paragraph_idx.positive?
+            parent_paragraph.children.insert(0, *key_children[0...parent_paragraph_idx])
+          end
+          if parent_paragraph_idx + 1 < key_children.length
+            parent_paragraph.children.push(*key_children[parent_paragraph_idx + 1...key_children.length])
+          end
+
+          # Flatten inner tag paragraphs
+          parent_paragraph.children.each do |child|
+            next unless child.is_a?(Elements::Tag)
+
+            child.children = child.children.map do |c|
+              c.is_a?(Elements::Paragraph) ? c.children : c
+            end.flatten
+          end
+
+          # Flatten inner paragraphs
+          parent_paragraph.children = parent_paragraph.children.map do |child|
+            child.is_a?(Elements::Paragraph) ? child.children : child
+          end.flatten
+
+          merged_children << parent_paragraph
+        end
+      end
+
+      merged_children
+    end
+  end
+end

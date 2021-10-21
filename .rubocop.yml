@@ -1,0 +1,85 @@
+require: rubocop-minitest
+
+AllCops:
+  Exclude:
+    - bin/*
+  NewCops: enable
+  SuggestExtensions: false
+
+Layout/LineLength:
+  Max: 120
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented_relative_to_receiver
+
+Lint/AmbiguousBlockAssociation:
+  Enabled: false
+
+Lint/MissingSuper:
+  Exclude:
+    - "lib/metadocs/source_map.rb"
+
+Metrics:
+  Enabled: false
+
+Metrics/AbcSize:
+  Max: 39
+
+Metrics/BlockLength:
+  Exclude:
+    - "**/*.rake"
+
+Metrics/ClassLength:
+  Exclude:
+    - "test/*/**/*.rb"
+    - "lib/metadocs/bbdocs.rb"
+  Max: 250
+
+Metrics/CyclomaticComplexity:
+  Max: 9
+
+Metrics/MethodLength:
+  Max: 50
+
+Metrics/PerceivedComplexity:
+  Max: 9
+
+Naming/InclusiveLanguage:
+  Enabled: false
+
+Minitest/MultipleAssertions:
+  Enabled: false
+
+Naming/MethodParameterName:
+  MinNameLength: 2
+
+Style/AndOr:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/NegatedIf:
+  Enabled: false
+
+Style/NestedParenthesizedCalls:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: "()"
+    "%i": "()"
+    "%r": "{}"
+    "%w": "()"
+
+Style/RescueModifier:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false

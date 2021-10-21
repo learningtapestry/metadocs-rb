@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "metadocs"
+require "googleauth"
+require "googleauth/stores/file_token_store"
+
+GOOGLE_CREDENTIALS_PATH = ENV.fetch("GOOGLE_CREDENTIALS_PATH", File.expand_path("../client_secrets.json", __dir__))
+GOOGLE_STORAGE_PATH = ENV.fetch("GOOGLE_STORAGE_PATH", File.expand_path("../tokens.yaml", __dir__))
+
+OOB_URI = "urn:ietf:wg:oauth:2.0:oob"
+
+client_id = Google::Auth::ClientId.from_file(GOOGLE_CREDENTIALS_PATH)
+token_store = Google::Auth::Stores::FileTokenStore.new(file: GOOGLE_STORAGE_PATH)
+authorizer = Google::Auth::UserAuthorizer.new(client_id, Metadocs::Parser::REQUIRED_SCOPES, token_store)
+
+credentials = authorizer.get_credentials("default")
+if credentials.nil?
+  url = authorizer.get_authorization_url(base_url: OOB_URI)
+  puts "Open #{url} in your browser and enter the resulting code: "
+  authorizer.get_and_store_credentials_from_code(
+    user_id: "default",
+    code: gets,
+    base_url: OOB_URI
+  )
+end

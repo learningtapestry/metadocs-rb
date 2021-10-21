@@ -1,0 +1,11 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+client_secrets.json
+tokens.yaml
+.byebug_history
