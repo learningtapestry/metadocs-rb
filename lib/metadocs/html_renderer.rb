@@ -42,7 +42,7 @@ module Metadocs
     end
 
     def render_tag
-      '<div data-tag=' # {element.name}">#{render_all(element.children).join}</div>"
+      %(<div data-tag="#{element.name}">#{render_all(element.children).join}</div>)
     end
 
     def render_tuple_table
