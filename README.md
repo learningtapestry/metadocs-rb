@@ -4,9 +4,11 @@ Metadocs is a set of tools for extracting data out of Google Documents. It is de
 to make life easier when using Google Docs as a content source for CMSs and related
 applications. It provides three main features:
 
-- A high level, idiomatic abstraction of [Google Docs API entities](https://developers.google.com/docs/api/reference/rest/v1/documents#Document)
-- BBDocs, a templating language that can be used inside Google Documents
-- Metadocs Tables, a specification for storing structured data inside Google Documents
+- A high level, idiomatic [abstraction](docs/elements.md) of
+  [Google Docs API entities](https://developers.google.com/docs/api/reference/rest/v1/documents#Document)
+- [BBDocs](docs/bbdocs.md), a templating language that can be used inside Google Documents
+- [Metadocs Tables](docs/metadocs_tables.md), a specification for storing structured data inside
+  Google Documents
 
 ## Installation
 
