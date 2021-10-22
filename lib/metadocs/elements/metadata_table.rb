@@ -6,6 +6,8 @@ module Metadocs
   class Elements::MetadataTable < Elements::Element
     attr_reader :error, :table, :name, :type
 
+    include Enumerable
+
     def initialize(table:, name:, type:)
       super()
       @table = table
@@ -13,6 +15,14 @@ module Metadocs
       @type = type.to_sym
 
       raise ArgumentError, "Unknown type: #{type}" unless %i(key_value tuple).include?(self.type)
+    end
+
+    def each(&blk)
+      metadata.each(&blk)
+    end
+
+    def [](idx)
+      metadata[idx]
     end
 
     def valid?

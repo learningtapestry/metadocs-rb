@@ -91,6 +91,14 @@ module Metadocs
       body.each(&blk)
     end
 
+    def [](idx)
+      if idx.is_a?(Numeric)
+        body[idx]
+      else
+        metadata[idx]
+      end
+    end
+
     protected
 
     attr_reader :ranges
