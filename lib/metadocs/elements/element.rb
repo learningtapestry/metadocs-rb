@@ -42,43 +42,43 @@ module Metadocs
     end
 
     def body?
-      self.is_al(Elements::Body)
+      is_al(Elements::Body)
     end
 
     def equation?
-      self.is_a?(Elements::Equation)
+      is_a?(Elements::Equation)
     end
 
     def image?
-      self.is_a?(Elements::Image)
+      is_a?(Elements::Image)
     end
 
     def metadata_table?
-      self.is_a?(Elements::MetadataTable)
+      is_a?(Elements::MetadataTable)
     end
 
     def paragraph?
-      self.is_a?(Elements::Paragraph)
+      is_a?(Elements::Paragraph)
     end
 
     def table_cell?
-      self.is_a?(Elements::TableCell)
+      is_a?(Elements::TableCell)
     end
 
     def table_row?
-      self.is_a?(Elements::TableRow)
+      is_a?(Elements::TableRow)
     end
 
     def table?
-      self.is_a?(Elements::Table)
+      is_a?(Elements::Table)
     end
 
     def tag?
-      self.is_a?(Elements::Tag)
+      is_a?(Elements::Tag)
     end
 
     def text?
-      self.is_a?(Elements::Text)
+      is_a?(Elements::Text)
     end
 
     protected

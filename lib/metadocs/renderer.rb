@@ -77,7 +77,7 @@ module Metadocs
 
     def render_tag
       render_method = :"render_#{element.name.underscore.downcase}"
-      self.send(render_method) if self.respond_to?(render_method, true)
+      send(render_method) if respond_to?(render_method, true)
     end
 
     def render_tuple_table; end
