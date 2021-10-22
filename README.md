@@ -62,27 +62,21 @@ BBDocs tag elements also appear in the parse tree:
 
 ```ruby
 metadoc = Metadocs::Parser.parse(
-    google_credentials,
-    doc_id,
-    tags: [
-        {
-            name: 'my-tag',
-            attributes: ['a', 'b']
-        }
-    ]
+  google_credentials,
+  doc_id,
+  tags: [{ name: 'my-tag', attributes: ['a', 'b'] }]
 )
 
 metadoc.each do |element|
-    if element.tag?
-        puts [
-            element.name,      # => 'my-tag'
-            element.attributes # => { a: 'example', b, ... }
-        ]
+  if element.tag?
+    puts [element.name, element.attributes]
+    # => 'my-tag'
+    # => { a: 'example', b, ... }
 
-        element.each do |child_element|
-            # Handle content nested inside the tag
-        end
+    element.each do |child_element|
+      # Handle content nested inside the tag
     end
+  end
 end
 ```
 
@@ -94,22 +88,18 @@ the [Metadocs Tables documentation](docs/metadocs_tables.md).
 
 ```ruby
 metadoc = Metadocs::Parser.parse(
-    google_credentials,
-    doc_id,
-    metadata_tables: [
-        {
-            name: 'my-doc-metadata',
-            type: 'key_value',
-            keys: [
-                {
-                    name: 'key-1'
-                },
-                {
-                    name: 'key-2'
-                }
-            ]
-        }
-    ]
+  google_credentials,
+  doc_id,
+  metadata_tables: [
+    {
+      name: 'my-doc-metadata',
+      type: 'key_value',
+      keys: [
+        { name: 'key-1' },
+        { name: 'key-2' }
+      ]
+    }
+  ]
 )
 
 # A doc may have multiple Metadocs Tables with the same name, so they're stored
@@ -124,28 +114,28 @@ to the parser:
 
 ```ruby
 class CustomHtmlRenderer < Metadocs::HtmlRenderer
-    def render_tag
-        if element.name == 'blink'
-            '<blink>' + render_children + '</blink>' # Why would somebody use this?
-        else
-            super
-        end
+  def render_tag
+    if element.name == 'blink'
+      '<blink>' + render_children + '</blink>' # Why would somebody use this?
+    else
+      super
     end
+  end
 end
 
 metadoc = Metadocs::Parser.parse(
-    google_credentials,
-    doc_id,
-    tags: [ { name: 'blink' } ],
-    renderers: { custom_html: CustomHtmlRenderer }
+  google_credentials,
+  doc_id,
+  tags: [ { name: 'blink' } ],
+  renderers: { custom_html: CustomHtmlRenderer }
 )
 
 metadoc.each do |element|
-    if element.tag?
-        puts element.render(:text)        # => '[blink]This is blinking text![/blink]'
-        puts element.render(:html)        # => '<div data-tag="blink">This is blinking text!</div>'
-        puts element.render(:custom_html) # => '<blink>This is blinking text!</blink>'
-    end
+  if element.tag?
+    puts element.render(:text)        # => '[blink]This is blinking text![/blink]'
+    puts element.render(:html)        # => '<div data-tag="blink">This is blinking text!</div>'
+    puts element.render(:custom_html) # => '<blink>This is blinking text!</blink>'
+  end
 end
 ```
 
