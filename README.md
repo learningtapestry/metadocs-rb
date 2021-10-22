@@ -1,4 +1,4 @@
-# Metadocs: Templating and Content Extraction for Google Docs
+# Metadocs: Markup and Content Extraction for Google Docs
 
 Metadocs is a set of tools for extracting data out of Google Documents. It is designed to
 to make life easier when using Google Docs as a content source for CMSs and related
@@ -6,7 +6,7 @@ applications. It provides three main features:
 
 - A high level, idiomatic [abstraction](docs/elements.md) of
   [Google Docs API entities](https://developers.google.com/docs/api/reference/rest/v1/documents#Document)
-- [BBDocs](docs/bbdocs.md), a templating language that can be used inside Google Documents
+- [BBDocs](docs/bbdocs.md), a markup language that can be used inside Google Documents
 - [Metadocs Tables](docs/metadocs_tables.md), a specification for storing structured data inside
   Google Documents
 
@@ -85,7 +85,7 @@ end
 ### Metadocs Tables
 
 Inline tables conforming to the Metadocs Tables specification will show up as structured data in
-the parse result. They're useful for storing metadata inside documents. Learn more about them  in
+the parse result. They're useful for storing metadata inside documents. Learn more about them in
 the [Metadocs Tables documentation](docs/metadocs_tables.md).
 
 ```ruby

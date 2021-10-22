@@ -1,6 +1,6 @@
 # BBDocs
 
-BBDocs is a templating language that can be freely used within the body of Google Documents. The
+BBDocs is a markup language that can be freely used within the body of Google Documents. The
 syntax is reminiscent of [BBCode](https://en.wikipedia.org/wiki/BBCode). It is designed to be easy
 to use by content authors, who are not necessarily tech-savvy.
 
