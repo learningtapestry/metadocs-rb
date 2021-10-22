@@ -95,7 +95,7 @@ metadoc = Metadocs::Parser.parse(
   metadata_tables: [
     {
       name: 'my-doc-metadata',
-      type: 'key_value',
+      type: :key_value,
       keys: [
         { name: 'key-1' },
         { name: 'key-2' }
@@ -106,7 +106,7 @@ metadoc = Metadocs::Parser.parse(
 
 # A doc may have multiple Metadocs Tables with the same name, so they're stored
 # as an array.
-metadoc['my-doc-metadata'][0]['key-1'] # => key-1: 'example'
+metadoc['my-doc-metadata'][0]['key-1'] # => [Elements::Paragraph, ...]
 ```
 
 ### Rendering
