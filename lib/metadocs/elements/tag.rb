@@ -5,7 +5,9 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Tag < Elements::Element
-      attr_accessor :name, :parent, :children, :attributes, :qualifier, :empty
+      has_children
+
+      attr_accessor :name, :parent, :attributes, :qualifier, :empty
 
       def initialize(
         name:,

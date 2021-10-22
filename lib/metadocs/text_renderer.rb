@@ -7,7 +7,7 @@ module Metadocs
     protected
 
     def render_body
-      render_all(element.children).join.strip
+      render_children.strip
     end
 
     def render_equation
@@ -25,23 +25,23 @@ module Metadocs
     end
 
     def render_paragraph
-      render_all(element.children).join
+      render_children
     end
 
     def render_table
-      render_all(element.rows).join
+      render_children
     end
 
     def render_table_row
-      render_all(element.cells).join
+      render_children
     end
 
     def render_table_cell
-      render_all(element.children).join
+      render_children
     end
 
     def render_tag
-      render_all(element.children).join
+      render_children
     end
 
     def render_tuple_table

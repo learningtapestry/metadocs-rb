@@ -5,11 +5,13 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Table < Elements::Element
-      attr_accessor :rows
+      has_children
+
+      alias_attr :children, :rows
 
       def initialize(rows: [])
         super()
-        @rows = rows
+        self.rows = rows
       end
     end
   end

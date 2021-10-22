@@ -45,6 +45,10 @@ module Metadocs
       elements.map { |element| element.render(type) }
     end
 
+    def render_children
+      render_all(element.children).join
+    end
+
     def render_body; end
 
     def render_equation; end
@@ -71,7 +75,10 @@ module Metadocs
 
     def render_table_cell; end
 
-    def render_tag; end
+    def render_tag
+      render_method = :"render_#{element.name.underscore.downcase}"
+      self.send(render_method) if self.respond_to?(render_method, true)
+    end
 
     def render_tuple_table; end
 

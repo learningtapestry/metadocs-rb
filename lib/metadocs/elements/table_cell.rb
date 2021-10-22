@@ -5,7 +5,7 @@ require_relative 'element'
 module Metadocs
   module Elements
     class TableCell < Elements::Element
-      attr_accessor :children
+      has_children
 
       def initialize(children: [])
         super()

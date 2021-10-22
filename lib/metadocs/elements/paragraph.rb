@@ -5,9 +5,7 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Paragraph < Elements::Element
-      include Enumerable
-
-      attr_accessor :children
+      has_children
 
       def initialize(children: [])
         super()

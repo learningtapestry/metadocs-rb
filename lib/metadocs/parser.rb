@@ -6,25 +6,29 @@ require_relative 'source_map'
 require_relative 'bbdocs'
 require_relative 'elements'
 require_relative 'paragraph_ranges'
+require_relative 'html_renderer'
 require_relative 'text_renderer'
 
 module Metadocs
   class Parser
+    include Enumerable
+
     DEFAULT_RENDERERS = {
+      html: Metadocs::HtmlRenderer,
       text: Metadocs::TextRenderer
     }.freeze
 
-    attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :result,
+    attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :body,
                 :metadata, :metadata_tables, :renderers
 
-    def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: DEFAULT_RENDERERS)
+    def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: [])
       @google_document = google_document
       @tags = tags
       @empty_tags = empty_tags
       @metadata = {}
       @metadata_tables = metadata_tables
       @images = {}
-      @renderers = renderers
+      @renderers = {}.merge(DEFAULT_RENDERERS).merge(renderers)
 
       (google_document.inline_objects || []).each do |id, object|
         properties = object.inline_object_properties.embedded_object
@@ -77,10 +81,14 @@ module Metadocs
       source_map.generate
 
       @ranges = ParagraphRanges.new(source_map)
-      @result = Elements::Body.with_renderers(
+      @body = Elements::Body.with_renderers(
         renderers,
         children: walk_ast(source_map.body, bbdocs.parse(source_map.body.source))
       )
+    end
+
+    def each(&blk)
+      body.each(&blk)
     end
 
     protected

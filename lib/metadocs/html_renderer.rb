@@ -7,7 +7,7 @@ module Metadocs
     protected
 
     def render_body
-      "<div>#{render_all(element.children).join}</div>".gsub(/\s+/, ' ')
+      "<div>#{render_children}</div>".gsub(/\s+/, ' ')
     end
 
     def render_equation
@@ -26,7 +26,7 @@ module Metadocs
     end
 
     def render_paragraph
-      %(<div class="paragraph">#{render_all(element.children).join.strip}</div>)
+      %(<div class="paragraph">#{render_children.strip}</div>)
     end
 
     def render_table
@@ -38,11 +38,11 @@ module Metadocs
     end
 
     def render_table_cell
-      "<td>#{render_all(element.children).join}</td>"
+      "<td>#{render_children}</td>"
     end
 
     def render_tag
-      %(<div data-tag="#{element.name}">#{render_all(element.children).join}</div>)
+      %(<div data-tag="#{element.name}">#{render_children}</div>)
     end
 
     def render_tuple_table
