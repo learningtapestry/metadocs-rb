@@ -21,7 +21,7 @@ module Metadocs
     attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :body,
                 :metadata, :metadata_tables, :renderers
 
-    def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: [])
+    def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: {})
       @google_document = google_document
       @tags = tags
       @empty_tags = empty_tags
@@ -217,7 +217,9 @@ module Metadocs
         renderers,
         id: id,
         content_uri: image.content_uri,
-        source_uri: image.source_uri
+        source_uri: image.source_uri,
+        title: image.title,
+        description: image.description
       )
     end
 
@@ -251,7 +253,7 @@ module Metadocs
         next unless metadata_table.valid?
 
         metadata[metadata_table.name] ||= []
-        metadata[metadata_table.name] << metadata_table
+        metadata[metadata_table.name] << metadata_table.metadata
         return metadata_table
       end
 
