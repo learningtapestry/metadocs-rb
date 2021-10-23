@@ -1,4 +1,4 @@
-# Metadocs: Markup and Content Extraction for Google Docs
+# Metadocs: Content Extraction Tools for Google Docs
 
 Metadocs is a set of tools for extracting data out of Google Documents. It is designed to
 to make life easier when using Google Docs as a content source for CMSs and related
