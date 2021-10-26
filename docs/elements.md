@@ -56,3 +56,11 @@ metadoc.each do |element|
   end
 end
 ```
+
+## API Limitations
+
+Unfortunately, not all entities in Google Docs are currently supported by the official API.
+
+More importantly, Equations and Drawings are not fully presented by the API - Equations are an
+empty object (the API doesn't give us any information about their values) and Drawings are not
+rendered in any way. Therefore, those two entity types are not supported by Metadocs.

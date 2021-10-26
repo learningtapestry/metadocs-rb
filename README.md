@@ -44,7 +44,10 @@ metadoc = Metadocs::Parser.parse(google_credentials, doc_id)
 
 The object returned by `.parse` can be iterated as a tree structure with objects that wrap Google
 Docs entities. There are helper methods you can call such as `.bold?` and `.italic?` for text
-paragraphs. See more at [Elements](docs/elements.md).
+paragraphs.
+
+Note that some entities are currently unsupported by the Docs API, and thus will not be available
+in Metadocs. See more at [Elements](docs/elements.md).
 
 ```ruby
 metadoc.each do |element|
