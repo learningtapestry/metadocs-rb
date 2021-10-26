@@ -45,10 +45,6 @@ module Metadocs
       is_al(Elements::Body)
     end
 
-    def equation?
-      is_a?(Elements::Equation)
-    end
-
     def image?
       is_a?(Elements::Image)
     end

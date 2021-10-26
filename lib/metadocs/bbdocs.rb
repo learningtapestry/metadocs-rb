@@ -7,7 +7,7 @@ module Metadocs
     attr_reader :tags, :empty_tags, :ignore_tags, :parser
 
     TAG_RE = /[\[\]]/.freeze
-    BUILTIN_TAGS = %w(gdocs equation).freeze
+    BUILTIN_TAGS = %w(gdocs).freeze
     BUILTIN_EMPTY_TAGS = [].freeze
     BUILTIN_IGNORE_TAGS = ['noop'].freeze
 

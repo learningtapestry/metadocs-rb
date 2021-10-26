@@ -10,10 +10,6 @@ module Metadocs
       render_children.strip
     end
 
-    def render_equation
-      element.value
-    end
-
     def render_image
       "IMG #{element.url}"
     end

@@ -174,22 +174,14 @@ module Metadocs
         end
       end
 
-      if name == 'equation'
-        raise ArgumentError, 'Invalid equation' unless children.any? && children.all do |c|
-          c.is_a?(Elements::Text)
-        end
-
-        Elements::Equation.with_renderers(renderers, value: children.map(&:value).join)
-      else
-        Elements::Tag.with_renderers(
-          renderers,
-          name: name,
-          children: children,
-          attributes: Hashie::Mash.new(attributes),
-          qualifier: open_tag[:qualifier]&.str,
-          empty: tag[:empty_tag] ? true : false
-        )
-      end
+      Elements::Tag.with_renderers(
+        renderers,
+        name: name,
+        children: children,
+        attributes: Hashie::Mash.new(attributes),
+        qualifier: open_tag[:qualifier]&.str,
+        empty: tag[:empty_tag] ? true : false
+      )
     end
 
     def parse_reference(mapping, node)

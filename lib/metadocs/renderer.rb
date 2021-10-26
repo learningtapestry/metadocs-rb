@@ -12,8 +12,6 @@ module Metadocs
     def render
       if one_of?(Elements::Body)
         render_body
-      elsif one_of?(Elements::Equation)
-        render_equation
       elsif one_of?(Elements::Image)
         render_image
       elsif one_of?(Elements::MetadataTable)
@@ -50,8 +48,6 @@ module Metadocs
     end
 
     def render_body; end
-
-    def render_equation; end
 
     def render_image; end
 

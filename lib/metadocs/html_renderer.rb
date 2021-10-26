@@ -10,10 +10,6 @@ module Metadocs
       "<div>#{render_children}</div>".gsub(/\s+/, ' ')
     end
 
-    def render_equation
-      element.value
-    end
-
     def render_image
       %(<img id="#{element.id}" src="#{element.url}" />)
     end
