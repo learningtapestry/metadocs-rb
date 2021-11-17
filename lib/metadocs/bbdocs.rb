@@ -113,6 +113,7 @@ module Metadocs
             space? >>
             self.class::EMPTY_TAGS.map { |t| str(t) }.reduce(:|).as(:name) >>
             qualifier.maybe >>
+            (space >> attribute).repeat.as(:attributes) >>
             space? >>
             str(']')
         end
