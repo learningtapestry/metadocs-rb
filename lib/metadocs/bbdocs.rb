@@ -87,7 +87,9 @@ module Metadocs
 
         rule(:end_tag) do
           (
-            str('[/') >>
+            str('[') >>
+            space? >>
+            str('/') >>
             user_defined_tag.as(:name) >>
             space? >>
             str(']')
