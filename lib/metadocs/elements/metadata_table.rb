@@ -57,13 +57,13 @@ module Metadocs
         return nil
       end
 
-      name_cells = rows[0].cells
-      unless name_cells.all? { |cell| all_text?(cell) }
+      name_cell = rows[0].cells[0]
+      unless all_text?(name_cell)
         @error = 'Title row can only have text elements'
         return nil
       end
 
-      row_name = name_cells.map { |c| join_text(c) }.join.strip
+      row_name = join_text(name_cell).strip
       if ![name, "[#{name}]"].include?(row_name)
         @error = "Expected name to be #{name}, but is #{row_name}"
         return nil
