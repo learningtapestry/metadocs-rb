@@ -46,7 +46,7 @@ module Metadocs
             para_uuid = SecureRandom.hex(4)
             begin_at = source.length
             if paragraph_element.text_run
-              source += paragraph_element.text_run.content
+              source += sanitize(paragraph_element.text_run.content)
               text_paragraphs << para_uuid
             else
               source += wrap_uuid(para_uuid)
@@ -115,6 +115,10 @@ module Metadocs
 
     def wrap_uuid(uuid)
       "[$:#{uuid}]"
+    end
+
+    def sanitize(str)
+      str.gsub(/[“”]/, '"')
     end
   end
 end

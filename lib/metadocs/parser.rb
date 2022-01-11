@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'hashie'
+require_relative 'parser_error'
 require_relative 'google_document'
 require_relative 'source_map'
 require_relative 'bbdocs'
@@ -85,6 +86,12 @@ module Metadocs
         renderers,
         children: walk_ast(source_map.body, bbdocs.parse(source_map.body.source))
       )
+    rescue StandardError => e
+      if e.is_a?(Metadocs::BbdocsError)
+        raise
+      else
+        raise ParserError.new(e)
+      end
     end
 
     def each(&blk)

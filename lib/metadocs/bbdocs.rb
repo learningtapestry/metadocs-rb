@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'parslet'
+require_relative 'bbdocs_error'
 
 module Metadocs
   class Bbdocs
@@ -27,6 +28,8 @@ module Metadocs
 
     def parse(content)
       parser.new.parse(content)
+    rescue Parslet::ParseFailed => e
+      raise BbdocsError.new(e, content)
     end
 
     protected
