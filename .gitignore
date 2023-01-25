@@ -9,3 +9,4 @@
 client_secrets.json
 tokens.yaml
 .byebug_history
+.DS_Store
