@@ -229,10 +229,14 @@ module Metadocs
         row = Elements::TableRow.with_renderers(renderers)
         table.rows << row
         cell_ids.each do |cell_id|
-          cell = Elements::TableCell.with_renderers(renderers)
+          cell_mapping = source_map[cell_id]
+          cell = Elements::TableCell.with_renderers(
+            renderers,
+            column_span: cell_mapping['element'].table_cell_style.column_span,
+            row_span: cell_mapping['element'].table_cell_style.row_span,
+          )
           row.cells << cell
 
-          cell_mapping = source_map[cell_id]
           cell_bbdocs = Metadocs::Bbdocs.new(
             tags: tag_names,
             empty_tags: empty_tag_names,

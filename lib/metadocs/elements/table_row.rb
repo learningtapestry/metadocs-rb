@@ -13,6 +13,17 @@ module Metadocs
         super()
         self.cells = cells
       end
+
+      def perceptible_cells
+        p_cells = []
+        i = 0
+        while i < cells.count
+          cell = cells[i]
+          p_cells << cell
+          i += cell.column_span
+        end
+        p_cells
+      end
     end
   end
 end

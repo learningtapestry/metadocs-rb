@@ -49,6 +49,10 @@ module Metadocs
       rows[1].cells
     end
 
+    def perceptible_header_cells
+      rows[1].perceptible_cells
+    end
+
     protected
 
     def parse_metadata
@@ -69,7 +73,7 @@ module Metadocs
         return nil
       end
 
-      if tuple? && rows.length < 2
+      if tuple? && perceptible_cells.length < 2
         @error = 'Tuple-type tables must have at least 2 rows'
         return nil
       end
@@ -88,13 +92,13 @@ module Metadocs
       data = {}
       data_rows = rows[1..]
 
-      unless data_rows.all? { |r| r.cells.length == 2 }
+      unless data_rows.all? { |r| r.perceptible_cells.length == 2 }
         @error = 'Data rows must have 2 cells'
         return nil
       end
 
       data_rows.each do |row|
-        key_cell, value_cell = row.cells
+        key_cell, value_cell = row.perceptible_cells
 
         unless all_text?(key_cell)
           @error = 'Key cells must only have text elements'
@@ -114,13 +118,13 @@ module Metadocs
       data = []
       data_rows = rows[2..]
 
-      headers = header_cells.map { |c| join_text(c).downcase }
+      headers = perceptible_header_cells.map { |c| join_text(c).downcase }
       if headers.any?(&:empty?)
         @error = 'Headers must not be empty'
         return nil
       end
 
-      unless data_rows.all? { |r| r.cells.length == header_cells.length }
+      unless data_rows.all? { |r| r.perceptible_cells.length == perceptible_header_cells.length }
         @error = 'All data rows must have the same number of cells as the header row'
         return nil
       end
@@ -128,7 +132,7 @@ module Metadocs
       data_rows.each do |row|
         entry = {}
         headers.each_with_index do |header, idx|
-          entry[header] = Elements::Body.with_renderers(renderers, children: row.cells[idx].children.dup)
+          entry[header] = Elements::Body.with_renderers(renderers, children: row.perceptible_cells[idx].children.dup)
         end
 
         next if entry.values.all? { |c| all_text?(c) && join_text(c).empty? }
