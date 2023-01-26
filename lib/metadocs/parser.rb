@@ -31,29 +31,22 @@ module Metadocs
       @images = {}
       @renderers = {}.merge(DEFAULT_RENDERERS).merge(renderers)
 
-      (google_document.inline_objects || []).each do |id, object|
-        properties = object.inline_object_properties.embedded_object
+      image_candidates = Array(google_document.inline_objects) + Array(google_document.positioned_objects)
+      image_candidates.each do |id, object|
+        object_properties = object.try(:inline_object_properties) || object.try(:positioned_object_properties)
+        properties = object_properties.embedded_object
         next unless properties.image_properties
-
+        dimensions = properties.size
+        width = "#{dimensions.width.magnitude}#{dimensions.width.unit}" if dimensions.width
+        height = "#{dimensions.height.magnitude}#{dimensions.height.unit}" if dimensions.height
         images[id] = Hashie::Mash.new({
                                         inline_object: object,
                                         title: properties.title,
                                         description: properties.description,
                                         content_uri: properties.image_properties.content_uri,
-                                        source_uri: properties.image_properties.source_uri
-                                      })
-      end
-
-      (google_document.positioned_objects || []).each do |id, object|
-        properties = object.positioned_object_properties.embedded_object
-        next unless properties.image_properties
-
-        images[id] = Hashie::Mash.new({
-                                        inline_object: object,
-                                        title: properties.title,
-                                        description: properties.description,
-                                        content_uri: properties.image_properties.content_uri,
-                                        source_uri: properties.image_properties.source_uri
+                                        source_uri: properties.image_properties.source_uri,
+                                        width: width,
+                                        height: height,
                                       })
       end
     end
