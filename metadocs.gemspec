@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop-minitest'
 
   # Runtime dependencies
-  spec.add_runtime_dependency 'google-api-client', '~> 0.52'
-  spec.add_runtime_dependency 'hashie', '~> 3.6'
-  spec.add_runtime_dependency 'parslet', '~> 2.0'
+  spec.add_runtime_dependency 'google-api-client', '>= 0.52'
+  spec.add_runtime_dependency 'hashie', '>= 3.6'
+  spec.add_runtime_dependency 'parslet', '>= 2.0'
 end
