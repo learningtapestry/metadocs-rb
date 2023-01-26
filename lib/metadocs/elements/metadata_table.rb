@@ -73,7 +73,7 @@ module Metadocs
         return nil
       end
 
-      if tuple? && perceptible_cells.length < 2
+      if tuple? && rows.length < 2
         @error = 'Tuple-type tables must have at least 2 rows'
         return nil
       end
