@@ -131,10 +131,27 @@ module Metadocs
           struct_paragraphs = parse_text(mapping, node).group_by { |(struct, _paragraph)| struct }
           struct_paragraphs.each do |struct_paragraph, paragraph_elements|
             texts = paragraph_elements.map { |p| p[1..] }.flatten
-            paragraph = Elements::Paragraph.with_renderers(
-              renderers,
-              children: texts
-            )
+            if struct_paragraph.paragraph.bullet
+              p_attrs = struct_paragraph.paragraph
+              list_id = p_attrs.bullet.list_id
+              list_properties = google_document.lists[list_id].list_properties
+              nesting_level = p_attrs.bullet.nesting_level.to_i
+              glyph_type = list_properties.nesting_levels[nesting_level].glyph_type
+              glyph_symbol = list_properties.nesting_levels[nesting_level].glyph_symbol
+              paragraph = Elements::ListItem.with_renderers(
+                renderers,
+                list_id: p_attrs.bullet.list_id,
+                nesting_level: nesting_level,
+                glyph_type: glyph_type,
+                glyph_symbol: glyph_symbol,
+                children: texts
+              )
+            else
+              paragraph = Elements::Paragraph.with_renderers(
+                renderers,
+                children: texts
+              )
+            end
             paragraph.structural_element = struct_paragraph
             children << paragraph
           end
@@ -187,7 +204,7 @@ module Metadocs
     def parse_reference(mapping, node)
       reference_mapping = source_map[node[:reference][:value].str]
       case reference_mapping.type
-      when :paragraph_element
+      when :paragraph_element, :list_item_element
         return parse_paragraph_reference(mapping, reference_mapping, node)
       when :table
         return parse_table_reference(mapping, reference_mapping, node)

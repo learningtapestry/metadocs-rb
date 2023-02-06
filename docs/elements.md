@@ -27,6 +27,11 @@ A [Metadocs Table](metadata_table.md).
 Content that appears in the same line in a Google Document will appear in the same `Paragraph`,
 usually in the form of `Text` elements.
 
+### List Item
+
+A Paragraph with a bullet or numeric label.
+
+
 ### Table, TableRow, TableCell
 
 Elements used for constructing a `Table`.

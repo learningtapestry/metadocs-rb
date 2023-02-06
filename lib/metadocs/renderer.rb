@@ -16,6 +16,8 @@ module Metadocs
         render_image
       elsif one_of?(Elements::MetadataTable)
         render_metadata_table
+      elsif one_of?(Elements::ListItem)
+        render_list_item
       elsif one_of?(Elements::Paragraph)
         render_paragraph
       elsif one_of?(Elements::TableCell)
@@ -62,6 +64,8 @@ module Metadocs
         raise ArgumentError, 'Unknown table type'
       end
     end
+
+    def render_list_item; end
 
     def render_paragraph; end
 

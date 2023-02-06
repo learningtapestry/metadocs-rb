@@ -22,6 +22,7 @@ module Metadocs
       text_paragraphs = []
       element = document.body
       content = element.content
+      lists = document.lists
 
       location&.each_with_index do |element_location, _idx|
         element = content[element_location[0]]
@@ -32,6 +33,8 @@ module Metadocs
                                 .table_rows[element_location[1]]
                                 .table_cells[element_location[2]]
                     element.content
+                  elsif type == :list_item
+                    element.paragraph.content
                   else
                     element.send(type).content
                   end
@@ -41,7 +44,7 @@ module Metadocs
         element_uuid = SecureRandom.hex(4)
         type = find_type(struct_element)
 
-        if type == :paragraph
+        if type == :paragraph || type == :list_item
           struct_element.paragraph.elements.each_with_index do |paragraph_element, para_idx|
             para_uuid = SecureRandom.hex(4)
             begin_at = source.length
@@ -52,8 +55,9 @@ module Metadocs
               source += wrap_uuid(para_uuid)
             end
 
+            hashie_type = "#{type}_element".to_sym
             self[para_uuid] = Hashie::Mash.new({
-                                                 type: :paragraph_element,
+                                                 type: hashie_type,
                                                  element: element,
                                                  paragraph_element: paragraph_element,
                                                  structural_element: struct_element,
@@ -100,7 +104,9 @@ module Metadocs
     end
 
     def find_type(struct_element)
-      if struct_element.paragraph
+      if struct_element.paragraph&.bullet
+        :list_item
+      elsif struct_element.paragraph
         :paragraph
       elsif struct_element.section_break
         :section_break

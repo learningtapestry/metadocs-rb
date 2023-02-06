@@ -42,7 +42,7 @@ module Metadocs
     end
 
     def body?
-      is_al(Elements::Body)
+      is_a?(Elements::Body)
     end
 
     def image?
@@ -55,6 +55,10 @@ module Metadocs
 
     def paragraph?
       is_a?(Elements::Paragraph)
+    end
+
+    def list_item?
+      is_a?(Elements::ListItem)
     end
 
     def table_cell?

@@ -21,6 +21,10 @@ module Metadocs
       "<table><tbody>#{rows.join}</tbody></table>"
     end
 
+    def render_list_item
+      %(<div class="list-item">#{render_children.strip}</div>)
+    end
+
     def render_paragraph
       %(<div class="paragraph">#{render_children.strip}</div>)
     end

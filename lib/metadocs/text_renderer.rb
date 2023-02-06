@@ -24,6 +24,10 @@ module Metadocs
       render_children
     end
 
+    def render_list_item
+      render_children
+    end
+
     def render_table
       render_children
     end
