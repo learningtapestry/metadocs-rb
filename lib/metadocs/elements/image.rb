@@ -5,9 +5,9 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Image < Elements::Element
-      attr_accessor :id, :content_uri, :source_uri, :title, :description, :width, :height
+      attr_accessor :id, :content_uri, :source_uri, :title, :description, :width, :height, :is_drawing
 
-      def initialize(id: nil, content_uri: nil, source_uri: nil, title: nil, description: nil, width: nil, height: nil)
+      def initialize(id: nil, content_uri: nil, source_uri: nil, title: nil, description: nil, width: nil, height: nil, is_drawing: false)
         super()
         @id = id
         @content_uri = content_uri
@@ -16,6 +16,7 @@ module Metadocs
         @description = description
         @width = width
         @height = height
+        @is_drawing = is_drawing
       end
 
       def url

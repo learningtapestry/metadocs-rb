@@ -35,19 +35,24 @@ module Metadocs
       image_candidates.each do |id, object|
         object_properties = object.try(:inline_object_properties) || object.try(:positioned_object_properties)
         properties = object_properties.embedded_object
-        next unless properties.image_properties
+        next unless properties.image_properties || properties.embedded_drawing_properties
         dimensions = properties.size
         width = "#{dimensions.width.magnitude}#{dimensions.width.unit}" if dimensions.width
         height = "#{dimensions.height.magnitude}#{dimensions.height.unit}" if dimensions.height
-        images[id] = Hashie::Mash.new({
-                                        inline_object: object,
-                                        title: properties.title,
-                                        description: properties.description,
-                                        content_uri: properties.image_properties.content_uri,
-                                        source_uri: properties.image_properties.source_uri,
-                                        width: width,
-                                        height: height,
-                                      })
+        image_meta = {
+          inline_object: object,
+          title: properties.title,
+          description: properties.description,
+          width: width,
+          height: height
+        }
+        if properties.image_properties.present?
+          image_meta[:content_uri] = properties.image_properties.content_uri
+          image_meta[:source_uri] = properties.image_properties.source_uri
+        elsif properties.embedded_drawing_properties.present?
+          image_meta[:is_drawing] = true
+        end
+        images[id] = Hashie::Mash.new(image_meta)
       end
     end
 
