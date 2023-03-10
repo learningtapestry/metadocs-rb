@@ -20,7 +20,7 @@ module Metadocs
     }.freeze
 
     attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :body,
-                :metadata, :metadata_tables, :renderers
+                :metadata, :metadata_tables, :renderers, :metadoc_properties
 
     def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: {})
       @google_document = google_document
@@ -30,6 +30,7 @@ module Metadocs
       @metadata_tables = metadata_tables
       @images = {}
       @renderers = {}.merge(DEFAULT_RENDERERS).merge(renderers)
+      @metadoc_properties = {}
 
       image_candidates = Array(google_document.inline_objects) + Array(google_document.positioned_objects)
       image_candidates.each do |id, object|
@@ -84,6 +85,7 @@ module Metadocs
         renderers,
         children: walk_ast(source_map.body, bbdocs.parse(source_map.body.source))
       )
+      @metadoc_properties = @metadata.values.first&.reduce(&:merge)
     rescue StandardError => e
       if e.is_a?(Metadocs::BbdocsError)
         raise
