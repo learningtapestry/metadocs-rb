@@ -90,7 +90,7 @@ module Metadocs
       if e.is_a?(Metadocs::BbdocsError)
         raise
       else
-        raise ParserError.new(e)
+        raise ParserError.new(e.message)
       end
     end
 
@@ -317,6 +317,7 @@ module Metadocs
         else
           # Merge related children
           parent_paragraph_idx = key_children.index { |c| c.is_a?(Elements::Paragraph) }
+          raise ParserError.new("Invalid nesting of tags—check the input.") if parent_paragraph_idx.nil?
           parent_paragraph = key_children[parent_paragraph_idx]
           if parent_paragraph_idx.positive?
             parent_paragraph.children.insert(0, *key_children[0...parent_paragraph_idx])
