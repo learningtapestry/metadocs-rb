@@ -20,9 +20,9 @@ module Metadocs
     }.freeze
 
     attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :body,
-                :metadata, :metadata_tables, :renderers, :metadoc_properties
+                :metadata, :metadata_tables, :renderers, :metadoc_properties, :errors
 
-    def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: {})
+    def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: {}, halt_on_error: true)
       @google_document = google_document
       @tags = tags
       @empty_tags = empty_tags
@@ -31,6 +31,8 @@ module Metadocs
       @images = {}
       @renderers = {}.merge(DEFAULT_RENDERERS).merge(renderers)
       @metadoc_properties = {}
+      @halt_on_error = halt_on_error
+      @errors = []
 
       image_candidates = Array(google_document.inline_objects) + Array(google_document.positioned_objects)
       image_candidates.each do |id, object|
@@ -87,11 +89,9 @@ module Metadocs
       )
       @metadoc_properties = @metadata.values.first&.reduce(&:merge)
     rescue StandardError => e
-      if e.is_a?(Metadocs::BbdocsError)
-        raise
-      else
-        raise ParserError.new(e.message)
-      end
+      e = ParserError.new(e.message) unless e.is_a?(Metadocs::BbdocsError)
+      @errors << e
+      raise e if halt_on_error?
     end
 
     def each(&blk)
@@ -109,6 +109,10 @@ module Metadocs
     protected
 
     attr_reader :ranges
+
+    def halt_on_error?
+      @halt_on_error == true
+    end
 
     def tag_names
       @tag_names ||= tags.map { |t| t[:name] }
@@ -317,7 +321,7 @@ module Metadocs
         else
           # Merge related children
           parent_paragraph_idx = key_children.index { |c| c.is_a?(Elements::Paragraph) }
-          raise ParserError.new("Invalid nesting of tags—check the input.") if parent_paragraph_idx.nil?
+          raise ParserError.new("Invalid nesting of tags near '#{key_children.map(&:render).join}'.") if parent_paragraph_idx.nil?
           parent_paragraph = key_children[parent_paragraph_idx]
           if parent_paragraph_idx.positive?
             parent_paragraph.children.insert(0, *key_children[0...parent_paragraph_idx])
