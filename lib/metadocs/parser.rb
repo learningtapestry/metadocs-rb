@@ -246,6 +246,7 @@ module Metadocs
         content_uri: image.content_uri,
         source_uri: image.source_uri,
         title: image.title,
+        link_uri: paragraph_element.inline_object_element.text_style&.link&.url,
         description: image.description,
         width: image.width,
         height: image.height
