@@ -225,6 +225,13 @@ module Metadocs
     end
 
     def parse_paragraph_reference(_mapping, reference_mapping, _node)
+      obj_id = reference_mapping.positioned_object_id
+      if obj_id
+        img = images[obj_id]
+        raise ParserError.new("The following drawing uses incompatible positioning:\n #{obj_id}") if img.is_drawing
+        image_uri = img["inline_object"].positioned_object_properties.embedded_object.image_properties.content_uri
+        raise ParserError.new("The following image uses incompatible positioning:\n #{image_uri}")
+      end
       paragraph_element = reference_mapping.paragraph_element
       return unless paragraph_element.inline_object_element
 
@@ -239,7 +246,9 @@ module Metadocs
         content_uri: image.content_uri,
         source_uri: image.source_uri,
         title: image.title,
-        description: image.description
+        description: image.description,
+        width: image.width,
+        height: image.height
       )
     end
 

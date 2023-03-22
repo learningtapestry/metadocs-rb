@@ -22,7 +22,6 @@ module Metadocs
       text_paragraphs = []
       element = document.body
       content = element.content
-      lists = document.lists
 
       location&.each_with_index do |element_location, _idx|
         element = content[element_location[0]]
@@ -61,8 +60,20 @@ module Metadocs
                                                  element: element,
                                                  paragraph_element: paragraph_element,
                                                  structural_element: struct_element,
-                                                 source_location: begin_at...source.length,
-                                                 location: (location || []) + [idx, para_idx]
+                                                 source_location: begin_at...source.length
+                                               })
+          end
+          struct_element.paragraph.positioned_object_ids.to_a.each do |pos_obj_id|
+            begin_at = source.length
+            object_uuid = SecureRandom.hex(4)
+            source += wrap_uuid(object_uuid)
+            hashie_type = "#{type}_element".to_sym
+            self[object_uuid] = Hashie::Mash.new({
+                                                 type: hashie_type,
+                                                 element: element,
+                                                 positioned_object_id: pos_obj_id,
+                                                 structural_element: struct_element,
+                                                 source_location: begin_at...source.length
                                                })
           end
         else
@@ -72,7 +83,6 @@ module Metadocs
                                                   type: type,
                                                   element: element,
                                                   structural_element: struct_element,
-                                                  location: (location || []) + [idx],
                                                   table_rows: []
                                                 })
 
@@ -98,8 +108,7 @@ module Metadocs
       self[uuid] = Hashie::Mash.new({
                                       element: element,
                                       source: source,
-                                      text_paragraphs: text_paragraphs,
-                                      location: location
+                                      text_paragraphs: text_paragraphs
                                     })
     end
 
