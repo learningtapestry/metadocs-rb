@@ -233,6 +233,8 @@ module Metadocs
         raise ParserError.new("The following image uses incompatible positioning:\n #{image_uri}")
       end
       paragraph_element = reference_mapping.paragraph_element
+      # binding.pry if paragraph_element.equation
+      raise ParserError.new("Cannot parse Google equations!") if paragraph_element.equation
       return unless paragraph_element.inline_object_element
 
       id = paragraph_element.inline_object_element.inline_object_id
