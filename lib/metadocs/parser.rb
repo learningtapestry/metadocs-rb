@@ -53,6 +53,9 @@ module Metadocs
         if properties.image_properties.present?
           image_meta[:content_uri] = properties.image_properties.content_uri
           image_meta[:source_uri] = properties.image_properties.source_uri
+          %i[offset_bottom offset_left offset_right offset_top].each do |crop_property|
+            image_meta[:is_cropped] = true if properties.image_properties.crop_properties.try(crop_property)
+          end
         elsif properties.embedded_drawing_properties.present?
           image_meta[:is_drawing] = true
         end
@@ -228,9 +231,12 @@ module Metadocs
 
     # currently only replaces image references
     def parse_paragraph_reference(_mapping, reference_mapping, _node)
+      first_nearby_text = reference_mapping["element"].content.map(&:paragraph).first.elements.map(&:text_run).compact.map(&:content).join.strip
+      first_nearby_text = "\"#{first_nearby_text}\"" unless first_nearby_text.empty?
+      first_nearby_text = "{no text in table cell}" if first_nearby_text.empty?
       if (obj_id = reference_mapping.positioned_object_id)
         img = images[obj_id]
-        raise ParserError.new("The following drawing uses incompatible positioning:\n #{obj_id}") if img.is_drawing
+        raise ParserError.new("A drawing uses incompatible positioning, near: \n#{first_nearby_text}") if img.is_drawing
         image_uri = img["inline_object"].positioned_object_properties.embedded_object.image_properties.content_uri
         raise ParserError.new("The following image uses incompatible positioning:\n #{image_uri}")
       end
@@ -243,6 +249,8 @@ module Metadocs
 
       return nil unless image
 
+      @errors << ParserError.new("Cropped image near: \n#{first_nearby_text}") if image.is_cropped
+
       parsed_image = Elements::Image.with_renderers(
         renderers,
         id: id,
@@ -252,7 +260,8 @@ module Metadocs
         title: image.title,
         description: image.description,
         width: image.width,
-        height: image.height
+        height: image.height,
+        is_drawing: image.is_drawing
       )
       parsed_images[id] = parsed_image
       parsed_image.structural_element = reference_mapping.structural_element
