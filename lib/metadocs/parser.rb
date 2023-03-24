@@ -329,6 +329,7 @@ module Metadocs
 
     # Merge tags and paragraphs.
     def merge_paragraphs(children)
+      return children if children.count == 1
       merged_children = []
       # Accumulate all children that belong to the same structural element
       struct_children = {}
