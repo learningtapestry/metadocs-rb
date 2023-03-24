@@ -19,7 +19,7 @@ module Metadocs
       text: Metadocs::TextRenderer
     }.freeze
 
-    attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :body,
+    attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :parsed_images, :body,
                 :metadata, :metadata_tables, :renderers, :metadoc_properties, :errors
 
     def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: {}, halt_on_error: true)
@@ -29,6 +29,7 @@ module Metadocs
       @metadata = {}
       @metadata_tables = metadata_tables
       @images = {}
+      @parsed_images = {}
       @renderers = {}.merge(DEFAULT_RENDERERS).merge(renderers)
       @metadoc_properties = {}
       @halt_on_error = halt_on_error
@@ -83,6 +84,7 @@ module Metadocs
       source_map.generate
 
       @ranges = ParagraphRanges.new(source_map)
+
       @body = Elements::Body.with_renderers(
         renderers,
         children: walk_ast(source_map.body, bbdocs.parse(source_map.body.source))
@@ -123,7 +125,7 @@ module Metadocs
     end
 
     def metadata_table_names
-      @metadata_table_names ||= metadata_tables.map { |mtt| mtt[:name] }
+      @metadata_table_names ||= metadata_tables.map { |mdt| mdt[:name] }
     end
 
     def walk_ast(mapping, ast)
@@ -224,16 +226,15 @@ module Metadocs
       nil
     end
 
+    # currently only replaces image references
     def parse_paragraph_reference(_mapping, reference_mapping, _node)
-      obj_id = reference_mapping.positioned_object_id
-      if obj_id
+      if (obj_id = reference_mapping.positioned_object_id)
         img = images[obj_id]
         raise ParserError.new("The following drawing uses incompatible positioning:\n #{obj_id}") if img.is_drawing
         image_uri = img["inline_object"].positioned_object_properties.embedded_object.image_properties.content_uri
         raise ParserError.new("The following image uses incompatible positioning:\n #{image_uri}")
       end
       paragraph_element = reference_mapping.paragraph_element
-      # binding.pry if paragraph_element.equation
       raise ParserError.new("Cannot parse Google equations!") if paragraph_element.equation
       return unless paragraph_element.inline_object_element
 
@@ -242,17 +243,20 @@ module Metadocs
 
       return nil unless image
 
-      Elements::Image.with_renderers(
+      parsed_image = Elements::Image.with_renderers(
         renderers,
         id: id,
         content_uri: image.content_uri,
         source_uri: image.source_uri,
-        title: image.title,
         link_uri: paragraph_element.inline_object_element.text_style&.link&.url,
+        title: image.title,
         description: image.description,
         width: image.width,
         height: image.height
       )
+      parsed_images[id] = parsed_image
+      parsed_image.structural_element = reference_mapping.structural_element
+      parsed_image
     end
 
     def parse_table_reference(_mapping, reference_mapping, _node)
@@ -317,7 +321,6 @@ module Metadocs
     # Merge tags and paragraphs.
     def merge_paragraphs(children)
       merged_children = []
-
       # Accumulate all children that belong to the same structural element
       struct_children = {}
       children.each_with_index do |child, idx|
