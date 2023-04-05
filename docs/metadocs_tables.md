@@ -16,7 +16,7 @@ table's title will yield a collection of metadata tables.
 metadoc = Metadocs::Parser.parse(
   google_credentials,
   doc_id,
-  metadata_tables: [{ name: 'my-doc-metadata', type: 'key_value', keys: [{ name: 'key-1' }] }]
+  metadata_table_spec: [{ name: 'my-doc-metadata', type: 'key_value', keys: [{ name: 'key-1' }] }]
 )
 
 my_doc_metadatas = metadoc['my-doc-metadata']
@@ -49,7 +49,7 @@ Ruby representation:
 metadoc = Metadocs::Parser.parse(
   google_credentials,
   doc_id,
-  metadata_tables: [
+  metadata_table_spec: [
     {
       name: 'my-doc-metadata',
       type: :key_value,
@@ -84,7 +84,7 @@ Ruby representation:
 metadoc = Metadocs::Parser.parse(
   google_credentials,
   doc_id,
-  metadata_tables: [
+  metadata_table_spec: [
     {
       name: 'my-doc-metadata',
       type: :tuple,

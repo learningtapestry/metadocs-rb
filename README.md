@@ -95,7 +95,7 @@ the [Metadocs Tables documentation](docs/metadocs_tables.md).
 metadoc = Metadocs::Parser.parse(
   google_credentials,
   doc_id,
-  metadata_tables: [
+  metadata_table_spec: [
     {
       name: 'my-doc-metadata',
       type: :key_value,

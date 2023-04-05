@@ -20,14 +20,14 @@ module Metadocs
     }.freeze
 
     attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :parsed_images, :body,
-                :metadata, :metadata_tables, :renderers, :metadoc_properties, :errors
+                :metadata, :metadata_table_spec, :renderers, :metadoc_properties, :errors
 
-    def initialize(google_document, tags: [], empty_tags: [], metadata_tables: [], renderers: {}, halt_on_error: true)
+    def initialize(google_document, tags: [], empty_tags: [], metadata_table_spec: [], renderers: {}, halt_on_error: true)
       @google_document = google_document
       @tags = tags
       @empty_tags = empty_tags
       @metadata = {}
-      @metadata_tables = metadata_tables
+      @metadata_table_spec = metadata_table_spec
       @images = {}
       @parsed_images = {}
       @renderers = {}.merge(DEFAULT_RENDERERS).merge(renderers)
@@ -63,13 +63,13 @@ module Metadocs
       end
     end
 
-    def self.parse(google_authorization, doc_id, tags: [], empty_tags: [], metadata_tables: [], renderers: [])
+    def self.parse(google_authorization, doc_id, tags: [], empty_tags: [], metadata_table_spec: [], renderers: [])
       document = Metadocs::GoogleDocument.new(google_authorization, doc_id)
       parser = new(
         document.document,
         tags: tags,
         empty_tags: empty_tags,
-        metadata_tables: metadata_tables,
+        metadata_table_spec: metadata_table_spec,
         renderers: renderers
       )
       parser.parse
@@ -128,7 +128,7 @@ module Metadocs
     end
 
     def metadata_table_names
-      @metadata_table_names ||= metadata_tables.map { |mdt| mdt[:name] }
+      @metadata_table_names ||= metadata_table_spec.map { |mdt| mdt[:name] }
     end
 
     def walk_ast(mapping, ast)
@@ -292,7 +292,7 @@ module Metadocs
         end
       end
 
-      metadata_tables.each do |mtt|
+      metadata_table_spec.each do |mtt|
         metadata_table = Elements::MetadataTable.with_renderers(
           renderers,
           table: table,
