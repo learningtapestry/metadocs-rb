@@ -19,7 +19,7 @@ module Metadocs
       text: Metadocs::TextRenderer
     }.freeze
 
-    attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :parsed_images, :body,
+    attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :parsed_images, :body, :tables,
                 :metadata, :metadata_table_spec, :renderers, :metadoc_properties, :errors
 
     def initialize(google_document, tags: [], empty_tags: [], metadata_table_spec: [], renderers: {}, halt_on_error: true)
@@ -30,6 +30,7 @@ module Metadocs
       @metadata_table_spec = metadata_table_spec
       @images = {}
       @parsed_images = {}
+      @tables = []
       @renderers = {}.merge(DEFAULT_RENDERERS).merge(renderers)
       @metadoc_properties = {}
       @halt_on_error = halt_on_error
@@ -291,6 +292,8 @@ module Metadocs
           cell.children = walk_ast(cell_mapping, cell_bbdocs.parse(cell_mapping.source))
         end
       end
+
+      @tables << table
 
       metadata_table_spec.each do |mtt|
         metadata_table = Elements::MetadataTable.with_renderers(
