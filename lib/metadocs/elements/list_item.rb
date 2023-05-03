@@ -19,7 +19,7 @@ module Metadocs
         @glyph_symbol = glyph_symbol
       end
 
-      BULLET_GLYPHS = %w[● ○ ■ ❖ ➢ ➔ ◆ ★].freeze
+      BULLET_GLYPHS = %w[● ○ ■ ❖ ➢ ➔ ◆ ★ -].freeze
 
       def bulleted?
         BULLET_GLYPHS.include?(@glyph_symbol) || @glyph_type == "GLYPH_TYPE_UNSPECIFIED"
