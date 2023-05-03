@@ -22,7 +22,7 @@ module Metadocs
       BULLET_GLYPHS = %w[● ○ ■ ❖ ➢ ➔ ◆ ★].freeze
 
       def bulleted?
-        BULLET_GLYPHS.include?(@glyph_symbol)
+        BULLET_GLYPHS.include?(@glyph_symbol) || @glyph_type == "GLYPH_TYPE_UNSPECIFIED"
       end
 
       NUMBER_TYPES = %w[DECIMAL ALPHA ROMAN].freeze
