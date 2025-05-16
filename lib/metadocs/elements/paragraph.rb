@@ -5,7 +5,7 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Paragraph < Elements::Element
-      has_children
+      include Elements::ContainerMethods
 
       def initialize(children: [])
         super()

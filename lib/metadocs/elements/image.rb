@@ -5,11 +5,11 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Image < Elements::Element
-      attr_accessor :id, :content_uri, :source_uri, :title, :description
+      attr_accessor :inline_object_id, :content_uri, :source_uri, :title, :description
 
-      def initialize(id: nil, content_uri: nil, source_uri: nil, title: nil, description: nil)
+      def initialize(inline_object_id: nil, content_uri: nil, source_uri: nil, title: nil, description: nil)
         super()
-        @id = id
+        @inline_object_id = inline_object_id
         @content_uri = content_uri
         @source_uri = source_uri
         @title = title

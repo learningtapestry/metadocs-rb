@@ -58,12 +58,14 @@ module Metadocs
       end
 
       name_cell = rows[0].cells[0]
-      unless all_text?(name_cell)
-        @error = 'Title row can only have text elements'
+      is_all_text = all_text?(name_cell)
+      is_single_tag = single_tag?(name_cell)
+      unless is_all_text || is_single_tag
+        @error = 'Title row can only have text elements or a single tag element'
         return nil
       end
 
-      row_name = join_text(name_cell).strip
+      row_name = is_all_text ? join_text(name_cell).strip : get_tag_name(name_cell)
       if ![name, "[#{name}]"].include?(row_name)
         @error = "Expected name to be #{name}, but is #{row_name}"
         return nil
@@ -145,8 +147,26 @@ module Metadocs
       end
     end
 
+    def single_tag?(cell)
+      count_tags(cell) == 1
+    end
+
+    def count_tags(element)
+      if element.is_a?(Elements::Tag)
+        1
+      elsif element.respond_to?(:children)
+        element.children.sum { |child| count_tags(child) }
+      else
+        0
+      end
+    end
+
     def join_text(cell)
       cell.children.map { |p| p.children.map(&:value) }.flatten.join.strip
+    end
+
+    def get_tag_name(cell)
+      cell.children[0].children[0].name
     end
   end
 end

@@ -5,9 +5,10 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Table < Elements::Element
-      has_children
+      include Elements::ContainerMethods
 
       alias_attr :children, :rows
+      attr_accessor :metadata_table
 
       def initialize(rows: [])
         super()

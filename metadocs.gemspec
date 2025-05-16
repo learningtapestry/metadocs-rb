@@ -25,16 +25,8 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  # Dev dependencies
-  spec.add_development_dependency 'byebug'
-  spec.add_development_dependency 'googleauth'
-  spec.add_development_dependency 'minitest'
-  spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'rubocop'
-  spec.add_development_dependency 'rubocop-minitest'
-
-  # Runtime dependencies
-  spec.add_runtime_dependency 'google-api-client', '~> 0.52'
-  spec.add_runtime_dependency 'hashie', '~> 3.6'
-  spec.add_runtime_dependency 'parslet', '~> 2.0'
+  spec.add_dependency 'google-apis-docs_v1', '~> 0.31'
+  spec.add_dependency 'hashie', '~> 5.0'
+  spec.add_dependency 'parslet', '~> 2.0'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 end

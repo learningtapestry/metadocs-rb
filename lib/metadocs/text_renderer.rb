@@ -7,7 +7,7 @@ module Metadocs
     protected
 
     def render_body
-      render_children.strip
+      render_children.strip.gsub(/\n{3,}/, "\n\n")
     end
 
     def render_image
@@ -15,9 +15,10 @@ module Metadocs
     end
 
     def render_key_value_table
-      element.metadata.transform_values do |v|
+      table_rows = metadata_element.metadata.transform_values do |v|
         v.render(type)
       end.to_s
+      "#{metadata_element.name}\n#{table_rows}"
     end
 
     def render_paragraph
@@ -36,16 +37,17 @@ module Metadocs
       render_children
     end
 
-    def render_tag
-      render_children
-    end
-
     def render_tuple_table
-      element.metadata.map do |entry|
+      table_rows = metadata_element.metadata.map do |entry|
         entry.transform_values do |v|
           v.render(type)
         end.to_h
       end.to_s
+      "#{metadata_element.name}\n#{table_rows}"
+    end
+
+    def render_tag
+      element.name
     end
 
     def render_text

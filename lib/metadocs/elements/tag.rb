@@ -5,7 +5,7 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Tag < Elements::Element
-      has_children
+      include Elements::ContainerMethods
 
       attr_accessor :name, :parent, :attributes, :qualifier, :empty
 

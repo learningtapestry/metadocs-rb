@@ -15,8 +15,12 @@ module Metadocs
     include Enumerable
 
     DEFAULT_RENDERERS = {
-      html: Metadocs::HtmlRenderer,
-      text: Metadocs::TextRenderer
+      html: {
+        type: Metadocs::HtmlRenderer
+      },
+      text: {
+        type: Metadocs::TextRenderer
+      }
     }.freeze
 
     attr_reader :google_document, :tags, :empty_tags, :source_map, :bbdocs, :images, :body,
@@ -58,7 +62,7 @@ module Metadocs
       end
     end
 
-    def self.parse(google_authorization, doc_id, tags: [], empty_tags: [], metadata_tables: [], renderers: [])
+    def self.parse(google_authorization, doc_id, tags: [], empty_tags: [], metadata_tables: [], renderers: {})
       document = Metadocs::GoogleDocument.new(google_authorization, doc_id)
       parser = new(
         document.document,
@@ -75,8 +79,8 @@ module Metadocs
       @source_map = Metadocs::SourceMap.new(google_document)
       @bbdocs = Metadocs::Bbdocs.new(
         tags: tag_names,
-        empty_tags: empty_tag_names,
-        ignore_tags: metadata_table_names
+        empty_tags: empty_tag_names + metadata_table_names
+        # ignore_tags: metadata_table_names
       )
 
       source_map.generate
@@ -87,11 +91,13 @@ module Metadocs
         children: walk_ast(source_map.body, bbdocs.parse(source_map.body.source))
       )
     rescue StandardError => e
-      if e.is_a?(Metadocs::BbdocsError)
-        raise
-      else
-        raise ParserError.new(e)
-      end
+      raise if e.is_a?(Metadocs::BbdocsError)
+
+      raise ParserError.new(e)
+    end
+
+    def render(type, parser_options = {})
+      body.render(type, parser_options.merge(root: true))
     end
 
     def each(&blk)
@@ -165,7 +171,7 @@ module Metadocs
       start_at_range = ranges.find_paragraph(mapping.element, start_at)
       end_at_range = ranges.find_paragraph(mapping.element, end_at)
 
-      return start_at_range[0] if start_at_range[0] == end_at_range[0]
+      start_at_range[0] if start_at_range[0] == end_at_range[0]
     end
 
     def parse_tag(mapping, node)
@@ -207,14 +213,14 @@ module Metadocs
       paragraph_element = reference_mapping.paragraph_element
       return unless paragraph_element.inline_object_element
 
-      id = paragraph_element.inline_object_element.inline_object_id
-      image = images[id]
+      inline_object_id = paragraph_element.inline_object_element.inline_object_id
+      image = images[inline_object_id]
 
       return nil unless image
 
       Elements::Image.with_renderers(
         renderers,
-        id: id,
+        inline_object_id: inline_object_id,
         content_uri: image.content_uri,
         source_uri: image.source_uri,
         title: image.title,
@@ -235,8 +241,8 @@ module Metadocs
           cell_mapping = source_map[cell_id]
           cell_bbdocs = Metadocs::Bbdocs.new(
             tags: tag_names,
-            empty_tags: empty_tag_names,
-            ignore_tags: metadata_table_names
+            empty_tags: empty_tag_names + metadata_table_names
+            # ignore_tags: metadata_table_names
           )
           cell.children = walk_ast(cell_mapping, cell_bbdocs.parse(cell_mapping.source))
         end
@@ -253,7 +259,7 @@ module Metadocs
 
         metadata[metadata_table.name] ||= []
         metadata[metadata_table.name] << metadata_table.metadata
-        return metadata_table
+        table.metadata_table = metadata_table
       end
 
       table

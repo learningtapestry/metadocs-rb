@@ -5,7 +5,7 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Body < Elements::Element
-      has_children
+      include Elements::ContainerMethods
 
       def initialize(children: [])
         super()

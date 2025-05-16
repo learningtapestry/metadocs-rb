@@ -5,7 +5,7 @@ require_relative 'element'
 module Metadocs
   module Elements
     class TableRow < Elements::Element
-      has_children
+      include Elements::ContainerMethods
 
       alias_attr :children, :cells
 

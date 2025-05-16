@@ -1,33 +1,18 @@
 # frozen_string_literal: true
 
+require_relative 'container_methods'
+
 module Metadocs
   class Elements::Element
     attr_accessor :renderers, :structural_element
+    attr_reader :id
 
     DEFAULT_RENDERER = :text
 
     def self.with_renderers(renderers, attrs = {})
-      new_element = new(attrs)
+      new_element = new(**attrs)
       new_element.renderers = renderers
       new_element
-    end
-
-    def self.has_children
-      include Enumerable
-
-      attr_accessor :children
-
-      define_method :each do |&blk|
-        children.each(&blk)
-      end
-
-      def <<(child)
-        children << child
-      end
-
-      def [](idx)
-        children[idx]
-      end
     end
 
     def self.alias_attr(new_method, old_method)
@@ -35,14 +20,24 @@ module Metadocs
       alias_method :"#{old_method}=", :"#{new_method}="
     end
 
-    def render(renderer_type = DEFAULT_RENDERER)
+    def initialize
+      @id = SecureRandom.hex(4)
+    end
+
+    def render(renderer_type = DEFAULT_RENDERER, parser_options = {})
+      renderer = renderers[renderer_type]
+
       self.renderer_instances ||= {}
-      self.renderer_instances[renderer_type] ||= renderers[renderer_type].new(renderer_type, self)
+      self.renderer_instances[renderer_type] ||= renderer[:type].new(
+        renderer_type,
+        self,
+        {}.merge(renderer[:parser_options] || {}, parser_options)
+      )
       self.renderer_instances[renderer_type].render
     end
 
     def body?
-      is_al(Elements::Body)
+      is_a?(Elements::Body)
     end
 
     def image?
@@ -50,7 +45,7 @@ module Metadocs
     end
 
     def metadata_table?
-      is_a?(Elements::MetadataTable)
+      is_a?(Elements::Table) && metadata_table
     end
 
     def paragraph?

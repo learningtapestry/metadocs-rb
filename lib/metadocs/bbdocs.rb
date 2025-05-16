@@ -74,7 +74,10 @@ module Metadocs
 
         rule(:ignore_tag) do
           str('[') >>
-            self.class::IGNORE_TAGS.map { |t| str(t) }.reduce(:|) >>
+            space? >>
+            self.class::IGNORE_TAGS.map { |t| str(t) }.reduce(:|).as(:name) >>
+            qualifier.maybe >>
+            (space >> attribute).repeat.as(:attributes) >>
             space? >>
             str(']')
         end
@@ -143,8 +146,9 @@ module Metadocs
         rule(:attribute) do
           name.as(:name) >>
             str('=') >> (
-            (str('"') >> double_quoted_attribute_value.as(:value) >> str('"')) | # double quotes
-            (str("'") >> single_quoted_attribute_value.as(:value) >> str("'")) | # single quotes
+            (str('"') >> double_quoted_attribute_value.as(:value) >> str('"')) |
+            (str("'") >> single_quoted_attribute_value.as(:value) >> str("'")) |
+            (str('’') >> single_curly_attribute_value.as(:value) >> str('’')) |
             (str('“') >> left_curly_attribute_value.as(:value) >> str('“')) |
             (str('”') >> right_curly_attribute_value.as(:value) >> str('”'))
           )
@@ -156,6 +160,10 @@ module Metadocs
 
         rule(:single_quoted_attribute_value) do
           (str("'").absent? >> (match(/[^\[]/) | string_entity | numeric_entity)).repeat
+        end
+
+        rule(:single_curly_attribute_value) do
+          (str('’').absent? >> (match(/[^\[]/) | string_entity | numeric_entity)).repeat
         end
 
         rule(:left_curly_attribute_value) do
@@ -173,7 +181,7 @@ module Metadocs
         end
 
         rule(:qualifier_value) do
-          match(/[\w_\-,]/).repeat
+          ((space >> name >> str('=')).absent? >> match(/[\w\s\-,\.]/)).repeat(1)
         end
 
         rule(:string_entity) { match('&') >> name >> match(';') }

@@ -2,31 +2,32 @@
 
 module Metadocs
   class Renderer
-    attr_reader :element, :type
+    attr_reader :element, :type, :parser_options
 
-    def initialize(type, element)
+    def initialize(type, element, parser_options = {})
       @type = type
       @element = element
+      @parser_options = parser_options
     end
 
     def render
-      if one_of?(Elements::Body)
+      if element.body?
         render_body
-      elsif one_of?(Elements::Image)
+      elsif element.image?
         render_image
-      elsif one_of?(Elements::MetadataTable)
+      elsif element.metadata_table?
         render_metadata_table
-      elsif one_of?(Elements::Paragraph)
+      elsif element.paragraph?
         render_paragraph
-      elsif one_of?(Elements::TableCell)
+      elsif element.table_cell?
         render_table_cell
-      elsif one_of?(Elements::TableRow)
+      elsif element.table_row?
         render_table_row
-      elsif one_of?(Elements::Table)
+      elsif element.table?
         render_table
-      elsif one_of?(Elements::Tag)
+      elsif element.tag?
         render_tag
-      elsif one_of?(Elements::Text)
+      elsif element.text?
         render_text
       else
         raise ArgumentError, 'Unknown element type'
@@ -35,8 +36,8 @@ module Metadocs
 
     protected
 
-    def one_of?(*klasses)
-      klasses.any? { |klass| element.is_a?(klass) }
+    def metadata_element
+      element.metadata_table
     end
 
     def render_all(elements)
@@ -54,9 +55,9 @@ module Metadocs
     def render_key_value_table; end
 
     def render_metadata_table
-      if element.tuple?
+      if metadata_element.tuple?
         render_tuple_table
-      elsif element.key_value?
+      elsif metadata_element.key_value?
         render_key_value_table
       else
         raise ArgumentError, 'Unknown table type'
