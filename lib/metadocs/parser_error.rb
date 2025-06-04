@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 module Metadocs
   class ParserError < Error
     attr_reader :cause
 
-    def initialize(cause)
+    def initialize(message, cause)
+      super(message)
       @cause = cause
-      super(cause.message)
+      set_backtrace(cause.backtrace)
     end
   end
 end

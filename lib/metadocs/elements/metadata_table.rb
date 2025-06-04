@@ -8,8 +8,8 @@ module Metadocs
 
     include Enumerable
 
-    def initialize(table:, name:, type:)
-      super()
+    def initialize(renderers:, table:, name:, type:)
+      super(renderers: renderers)
       @table = table
       @name = name.to_s
       @type = type.to_sym
@@ -106,7 +106,7 @@ module Metadocs
         key = join_text(key_cell).downcase
         next if key.empty?
 
-        data[key] = Elements::Body.with_renderers(renderers, children: value_cell.children.dup)
+        data[key] = Elements::Body.new(renderers: renderers, children: value_cell.children.dup)
       end
 
       data
@@ -130,7 +130,8 @@ module Metadocs
       data_rows.each do |row|
         entry = {}
         headers.each_with_index do |header, idx|
-          entry[header] = Elements::Body.with_renderers(renderers, children: row.cells[idx].children.dup)
+          entry[header] = Elements::Body.new(renderers: renderers,
+                                             children: row.cells[idx].children.dup)
         end
 
         next if entry.values.all? { |c| all_text?(c) && join_text(c).empty? }

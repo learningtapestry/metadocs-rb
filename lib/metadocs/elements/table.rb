@@ -1,18 +1,14 @@
 # frozen_string_literal: true
 
-require_relative 'element'
+require_relative 'container_element'
 
 module Metadocs
   module Elements
-    class Table < Elements::Element
-      include Elements::ContainerMethods
-
-      alias_attr :children, :rows
+    class Table < ContainerElement
       attr_accessor :metadata_table
 
-      def initialize(rows: [])
-        super()
-        self.rows = rows
+      def rows
+        children
       end
     end
   end

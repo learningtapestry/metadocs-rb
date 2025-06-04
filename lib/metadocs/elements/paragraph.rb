@@ -1,18 +1,10 @@
 # frozen_string_literal: true
 
-require_relative 'element'
+require_relative 'container_element'
 
 module Metadocs
   module Elements
-    class Paragraph < Elements::Element
-      include Elements::ContainerMethods
-
-      def initialize(children: [])
-        super()
-        raise ArgumentError, 'Children must be an array' unless children.is_a?(Array)
-
-        @children = children
-      end
+    class Paragraph < ContainerElement
     end
   end
 end

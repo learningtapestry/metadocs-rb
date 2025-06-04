@@ -7,8 +7,11 @@ module Metadocs
     class Text < Elements::Element
       attr_accessor :value, :bold, :italic, :underline, :strikethrough
 
-      def initialize(value:, bold: false, italic: false, underline: false, strikethrough: false)
-        super()
+      def initialize(
+        renderers:,
+        value:, bold: false, italic: false, underline: false, strikethrough: false
+      )
+        super(renderers: renderers)
         @value = value
         @bold = bold
         @italic = italic

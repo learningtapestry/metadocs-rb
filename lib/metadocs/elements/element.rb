@@ -1,27 +1,15 @@
 # frozen_string_literal: true
 
-require_relative 'container_methods'
-
 module Metadocs
   class Elements::Element
-    attr_accessor :renderers, :structural_element
+    attr_accessor :structural_element, :renderers
     attr_reader :id
 
     DEFAULT_RENDERER = :text
 
-    def self.with_renderers(renderers, attrs = {})
-      new_element = new(**attrs)
-      new_element.renderers = renderers
-      new_element
-    end
-
-    def self.alias_attr(new_method, old_method)
-      alias_method :"#{old_method}", :"#{new_method}"
-      alias_method :"#{old_method}=", :"#{new_method}="
-    end
-
-    def initialize
+    def initialize(renderers:)
       @id = SecureRandom.hex(4)
+      @renderers = renderers
     end
 
     def render(renderer_type = DEFAULT_RENDERER, parser_options = {})
