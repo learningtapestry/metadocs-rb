@@ -10,6 +10,12 @@ module Metadocs
       def rows
         children
       end
+
+      def to_h
+        super.merge(
+          metadata_table: metadata_table.to_h
+        )
+      end
     end
   end
 end

@@ -49,7 +49,32 @@ module Metadocs
       rows[1].cells
     end
 
+    def to_h
+      element_super = Elements::Element.instance_method(:to_h).bind(self).call
+      hash = element_super.merge(
+        name: name,
+        type: type,
+        valid: valid?
+      )
+
+      hash[:error] = error if error
+      hash[:metadata] = serialize_metadata if valid?
+      hash
+    end
+
     protected
+
+    def serialize_metadata
+      if tuple?
+        metadata.map do |entry|
+          entry.transform_values { |v| v.respond_to?(:to_h) ? v.to_h : v }
+        end
+      elsif key_value?
+        metadata.transform_values { |v| v.respond_to?(:to_h) ? v.to_h : v }
+      else
+        metadata
+      end
+    end
 
     def parse_metadata
       if rows.empty?

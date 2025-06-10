@@ -25,6 +25,15 @@ module Metadocs
       def empty?
         empty
       end
+
+      def to_h
+        super.merge(
+          name: name,
+          attributes: attributes,
+          qualifier: qualifier,
+          empty: empty
+        )
+      end
     end
   end
 end

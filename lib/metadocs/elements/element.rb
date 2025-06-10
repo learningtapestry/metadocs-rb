@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'json'
+
 module Metadocs
   class Elements::Element
     attr_accessor :structural_element, :renderers
@@ -8,7 +10,7 @@ module Metadocs
     DEFAULT_RENDERER = :text
 
     def initialize(renderers:)
-      @id = SecureRandom.hex(4)
+      @id = short_id
       @renderers = renderers
     end
 
@@ -22,6 +24,17 @@ module Metadocs
         {}.merge(renderer[:parser_options] || {}, parser_options)
       )
       self.renderer_instances[renderer_type].render
+    end
+
+    def to_h
+      {
+        id: id,
+        type: self.class.name.split('::').last.downcase
+      }
+    end
+
+    def to_json(*args)
+      to_h.to_json(*args)
     end
 
     def body?
@@ -63,5 +76,11 @@ module Metadocs
     protected
 
     attr_accessor :renderer_instances
+
+    ID_CHARS = [('a'..'z'), ('A'..'Z'), ('0'..'9')].map(&:to_a).flatten.freeze
+
+    def short_id(length = 4)
+      Array.new(length) { ID_CHARS[SecureRandom.random_number(ID_CHARS.size)] }.join
+    end
   end
 end

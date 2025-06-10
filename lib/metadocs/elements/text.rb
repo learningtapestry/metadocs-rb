@@ -19,6 +19,16 @@ module Metadocs
         @strikethrough = strikethrough
       end
 
+      def to_h
+        super.merge(
+          value: value,
+          bold: bold,
+          italic: italic,
+          underline: underline,
+          strikethrough: strikethrough
+        )
+      end
+
       def bold?
         bold
       end

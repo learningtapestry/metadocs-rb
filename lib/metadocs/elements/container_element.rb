@@ -21,6 +21,12 @@ module Metadocs
       def [](idx)
         children[idx]
       end
+
+      def to_h
+        Elements::Element.instance_method(:to_h).bind(self).call.merge(
+          children: children.map(&:to_h)
+        )
+      end
     end
   end
 end
