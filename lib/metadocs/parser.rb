@@ -87,8 +87,8 @@ module Metadocs
 
       @ranges = ParagraphRanges.new(source_map)
       @body = Elements::Body.new(
-        renderers: renderers,
-        children: walk_ast(source_map.body, bbdocs.parse(source_map.body.source))
+        self,
+        walk_ast(source_map.body, bbdocs.parse(source_map.body.source))
       )
     rescue StandardError => e
       raise if e.is_a?(Metadocs::BbdocsError)
@@ -144,10 +144,7 @@ module Metadocs
           struct_paragraphs = parse_text(mapping, node).group_by { |(struct, _paragraph)| struct }
           struct_paragraphs.each do |struct_paragraph, paragraph_elements|
             texts = paragraph_elements.map { |p| p[1..] }.flatten
-            paragraph = Elements::Paragraph.new(
-              renderers: renderers,
-              children: texts
-            )
+            paragraph = Elements::Paragraph.new(self, texts)
             paragraph.structural_element = struct_paragraph
             children << paragraph
           end
@@ -188,9 +185,9 @@ module Metadocs
       end
 
       Elements::Tag.new(
-        renderers: renderers,
+        self,
+        children,
         name: name,
-        children: children,
         attributes: Hashie::Mash.new(attributes),
         qualifier: open_tag[:qualifier]&.str,
         empty: tag[:empty_tag] ? true : false
@@ -219,7 +216,7 @@ module Metadocs
       return nil unless image
 
       Elements::Image.new(
-        renderers: renderers,
+        self,
         inline_object_id: inline_object_id,
         content_uri: image.content_uri,
         source_uri: image.source_uri,
@@ -229,13 +226,13 @@ module Metadocs
     end
 
     def parse_table_reference(_mapping, reference_mapping, _node)
-      table = Elements::Table.new(renderers: renderers)
+      table = Elements::Table.new(self)
 
       reference_mapping.table_rows.each do |cell_ids|
-        row = Elements::TableRow.new(renderers: renderers)
+        row = Elements::TableRow.new(self)
         table.rows << row
         cell_ids.each do |cell_id|
-          cell = Elements::TableCell.new(renderers: renderers)
+          cell = Elements::TableCell.new(self)
           row.cells << cell
 
           cell_mapping = source_map[cell_id]
@@ -250,7 +247,7 @@ module Metadocs
 
       metadata_tables.each do |mtt|
         metadata_table = Elements::MetadataTable.new(
-          renderers: renderers,
+          self,
           table: table,
           name: mtt[:name],
           type: mtt[:type]
@@ -272,7 +269,7 @@ module Metadocs
         [
           structural_element,
           Elements::Text.new(
-            renderers: renderers,
+            self,
             value: text,
             bold: paragraph_element.text_run.text_style.bold ? true : false,
             italic: paragraph_element.text_run.text_style.italic ? true : false,

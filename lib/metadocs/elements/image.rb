@@ -7,9 +7,9 @@ module Metadocs
     class Image < Elements::Element
       attr_accessor :inline_object_id, :content_uri, :source_uri, :title, :description
 
-      def initialize(renderers:,
+      def initialize(parser,
                      inline_object_id: nil, content_uri: nil, source_uri: nil, title: nil, description: nil)
-        super(renderers: renderers)
+        super(parser)
         @inline_object_id = inline_object_id
         @content_uri = content_uri
         @source_uri = source_uri

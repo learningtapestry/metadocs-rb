@@ -8,10 +8,10 @@ module Metadocs
       attr_accessor :value, :bold, :italic, :underline, :strikethrough
 
       def initialize(
-        renderers:,
+        parser,
         value:, bold: false, italic: false, underline: false, strikethrough: false
       )
-        super(renderers: renderers)
+        super(parser)
         @value = value
         @bold = bold
         @italic = italic

@@ -48,7 +48,7 @@ module Metadocs
 
         rule(:node) do
           (
-            (blank_tag | tag).as(:tag) |
+            tag.as(:tag) |
             text.as(:text) |
             reference.as(:reference)
           ).repeat(0)
@@ -102,7 +102,7 @@ module Metadocs
           )
         end
 
-        rule(:blank_tag) do
+        rule(:childless_tag) do
           start_tag.as(:start_tag) >>
             match(/\s+/) >>
             end_tag.as(:end_tag)
@@ -133,6 +133,7 @@ module Metadocs
               node.as(:children) >>
               end_tag.as(:end_tag)
             ),
+            childless_tag,
             empty_tag.as(:empty_tag)
           ]
           rules.unshift(empty_user_defined_tag.as(:empty_tag)) unless self.class::EMPTY_TAGS.empty?

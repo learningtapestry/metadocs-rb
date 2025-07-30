@@ -8,14 +8,14 @@ module Metadocs
       attr_accessor :name, :parent, :attributes, :qualifier, :empty
 
       def initialize(
-        renderers:,
+        parser,
+        children = [],
         name:,
-        children: [],
         attributes: {},
         qualifier: nil,
         empty: false
       )
-        super(renderers: renderers, children: children)
+        super(parser, children)
         @name = name
         @attributes = attributes
         @qualifier = qualifier
@@ -33,6 +33,15 @@ module Metadocs
           qualifier: qualifier,
           empty: empty
         )
+      end
+
+      def full_name
+        f_name = qualifier ? "#{name}:#{qualifier}" : name
+        if f_name.start_with?('[')
+          f_name
+        else
+          "[#{f_name}]"
+        end
       end
     end
   end

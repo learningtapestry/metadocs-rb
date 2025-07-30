@@ -19,5 +19,9 @@ module Metadocs
     def document
       @document ||= @docs_service.get_document(document_id)
     end
+
+    def title
+      document.title
+    end
   end
 end

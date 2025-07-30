@@ -8,8 +8,8 @@ module Metadocs
 
     include Enumerable
 
-    def initialize(renderers:, table:, name:, type:)
-      super(renderers: renderers)
+    def initialize(parser, table:, name:, type:)
+      super(parser)
       @table = table
       @name = name.to_s
       @type = type.to_sym
@@ -52,7 +52,7 @@ module Metadocs
     def to_h
       element_super = Elements::Element.instance_method(:to_h).bind(self).call
       hash = element_super.merge(
-        name: name,
+        name: full_name,
         type: type,
         valid: valid?
       )
@@ -76,21 +76,25 @@ module Metadocs
       end
     end
 
+    def name_cell
+      rows[0].cells[0]
+    end
+
     def parse_metadata
       if rows.empty?
         @error = 'Table is empty'
         return nil
       end
 
-      name_cell = rows[0].cells[0]
-      is_all_text = all_text?(name_cell)
-      is_single_tag = single_tag?(name_cell)
-      unless is_all_text || is_single_tag
-        @error = 'Title row can only have text elements or a single tag element'
-        return nil
-      end
+      # is_all_text = all_text?(name_cell)
+      # is_single_tag = single_tag?(name_cell)
+      # unless is_all_text || is_single_tag
+      #   @error = 'Title row can only have text elements or a single tag element'
+      #   return nil
+      # end
 
-      row_name = is_all_text ? join_text(name_cell).strip : get_tag_name(name_cell)
+      #row_name = is_all_text ? join_text(name_cell).strip : get_tag_name(name_cell)
+      row_name = name_cell.render(:text).strip
       if ![name, "[#{name}]"].include?(row_name)
         @error = "Expected name to be #{name}, but is #{row_name}"
         return nil
@@ -131,7 +135,7 @@ module Metadocs
         key = join_text(key_cell).downcase
         next if key.empty?
 
-        data[key] = Elements::Body.new(renderers: renderers, children: value_cell.children.dup)
+        data[key] = Elements::Body.new(parser, value_cell.children.dup)
       end
 
       data
@@ -155,8 +159,7 @@ module Metadocs
       data_rows.each do |row|
         entry = {}
         headers.each_with_index do |header, idx|
-          entry[header] = Elements::Body.new(renderers: renderers,
-                                             children: row.cells[idx].children.dup)
+          entry[header] = Elements::Body.new(parser, row.cells[idx].children.dup)
         end
 
         next if entry.values.all? { |c| all_text?(c) && join_text(c).empty? }
@@ -174,7 +177,10 @@ module Metadocs
     end
 
     def single_tag?(cell)
-      count_tags(cell) == 1
+      cell.is_a?(Elements::Tag) || \
+        (cell.respond_to?(:children) &&
+          cell.children.length == 1 &&
+          cell.children.first.is_a?(Elements::Tag))
     end
 
     def count_tags(element)
@@ -193,6 +199,19 @@ module Metadocs
 
     def get_tag_name(cell)
       cell.children[0].children[0].name
+    end
+
+    def full_name
+      row_name = if all_text?(name_cell)
+                   join_text(name_cell).strip
+                 else
+                   name_cell.children[0].children[0].full_name
+                 end
+      if row_name.start_with?('[')
+        row_name
+      else
+        "[#{row_name}]"
+      end
     end
   end
 end

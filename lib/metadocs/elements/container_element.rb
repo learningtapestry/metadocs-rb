@@ -9,8 +9,8 @@ module Metadocs
 
       attr_accessor :children
 
-      def initialize(renderers:, children: [])
-        super(renderers: renderers)
+      def initialize(parser, children = [])
+        super(parser)
         @children = children
       end
 

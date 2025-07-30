@@ -4,14 +4,18 @@ require 'json'
 
 module Metadocs
   class Elements::Element
-    attr_accessor :structural_element, :renderers
+    attr_accessor :structural_element, :parser
     attr_reader :id
 
     DEFAULT_RENDERER = :text
 
-    def initialize(renderers:)
+    def initialize(parser)
       @id = short_id
-      @renderers = renderers
+      @parser = parser
+    end
+
+    def renderers
+      parser.renderers
     end
 
     def render(renderer_type = DEFAULT_RENDERER, parser_options = {})

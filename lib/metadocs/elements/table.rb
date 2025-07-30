@@ -12,9 +12,9 @@ module Metadocs
       end
 
       def to_h
-        super.merge(
-          metadata_table: metadata_table.to_h
-        )
+        hash = super
+        hash[:metadata_table] = metadata_table.to_h if metadata_table
+        hash
       end
     end
   end
