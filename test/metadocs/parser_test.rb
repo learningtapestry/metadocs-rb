@@ -116,6 +116,9 @@ class Metadocs::ParserTest < Minitest::Test
           <div data-type="p">
             <div data-tag="page-break"></div>
           </div>
+          <div data-type="p">
+            <div data-tag="page-break"></div>
+          </div>
           <div data-type="p">Test with qualifier…
             <div data-tag="pet-desc" data-qualifier="short with space"></div>
           </div>
@@ -185,6 +188,7 @@ class Metadocs::ParserTest < Minitest::Test
 
       pet-tuples
       [{"pet" => "dog", "rival" => "cat"}]
+      page-break
       page-break
 
       Test with qualifier… pet-desc

@@ -44,6 +44,18 @@ module Metadocs
 
     def new_parser_class
       Class.new(Parslet::Parser) do
+        def stri(str)
+          str.chars
+            .map! do |char|
+              if char.match(/[a-zA-Z]/)
+                match["#{char.upcase}#{char.downcase}"]
+              else
+                match[char]
+              end
+            end
+            .reduce(:>>)
+        end
+
         root(:node)
 
         rule(:node) do
@@ -69,13 +81,13 @@ module Metadocs
         end
 
         rule(:user_defined_tag) do
-          self.class::TAGS.map { |t| str(t) }.reduce(:|)
+          self.class::TAGS.map { |t| stri(t) }.reduce(:|)
         end
 
         rule(:ignore_tag) do
           str('[') >>
             space? >>
-            self.class::IGNORE_TAGS.map { |t| str(t) }.reduce(:|).as(:name) >>
+            self.class::IGNORE_TAGS.map { |t| stri(t) }.reduce(:|).as(:name) >>
             qualifier.maybe >>
             (space >> attribute).repeat.as(:attributes) >>
             space? >>
@@ -119,7 +131,7 @@ module Metadocs
         rule(:empty_user_defined_tag) do
           str('[') >>
             space? >>
-            self.class::EMPTY_TAGS.map { |t| str(t) }.reduce(:|).as(:name) >>
+            self.class::EMPTY_TAGS.map { |t| stri(t) }.reduce(:|).as(:name) >>
             qualifier.maybe >>
             (space >> attribute).repeat.as(:attributes) >>
             space? >>

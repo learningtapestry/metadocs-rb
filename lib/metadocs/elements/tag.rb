@@ -16,7 +16,7 @@ module Metadocs
         empty: false
       )
         super(parser, children)
-        @name = name
+        @name = name.downcase
         @attributes = attributes
         @qualifier = qualifier
         @empty = empty
