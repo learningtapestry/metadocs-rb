@@ -19,7 +19,7 @@ class Metadocs::ParserTest < Minitest::Test
       doc_id,
       metadata_tables: [
         {
-          name: 'pet-tuples',
+          name: '[pet-tuples]',
           type: :tuple,
           keys: [
             { name: 'pet' },
@@ -27,7 +27,7 @@ class Metadocs::ParserTest < Minitest::Test
           ]
         },
         {
-          name: 'pet',
+          name: '[pet]',
           type: :key_value,
           keys: [
             { name: 'pet' },
@@ -183,29 +183,29 @@ class Metadocs::ParserTest < Minitest::Test
       Test
       Test
 
-      pet
+      [pet]
       {"pet" => "dog", "rival" => "cat"}
 
-      pet-tuples
+      [pet-tuples]
       [{"pet" => "dog", "rival" => "cat"}]
-      page-break
-      page-break
+      [page-break]
+      [page-break]
 
-      Test with qualifier… pet-desc
+      Test with qualifier… [pet-desc:short with space]
 
-      Test with attributes… pet-desc
+      Test with attributes… [pet-desc:short]
 
-      Test with curly (single)… pet-desc
+      Test with curly (single)… [pet-desc]
 
-      Test with curly (left)… pet-desc
+      Test with curly (left)… [pet-desc]
 
-      Test with curly (right)… pet-desc
+      Test with curly (right)… [pet-desc]
 
-      Test with single quote… pet-desc
+      Test with single quote… [pet-desc]
 
-      Test with qualifier and attributes… pet-desc
+      Test with qualifier and attributes… [pet-desc:short]
 
-      pet-full
+      [pet-full]
 
       IMG #{img_url}
 

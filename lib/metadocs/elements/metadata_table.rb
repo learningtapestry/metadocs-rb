@@ -4,15 +4,16 @@ require_relative 'element'
 
 module Metadocs
   class Elements::MetadataTable < Elements::Element
-    attr_reader :error, :table, :name, :type
+    attr_reader :error, :table, :name, :type, :brackets
 
     include Enumerable
 
-    def initialize(parser, table:, name:, type:)
+    def initialize(parser, table:, name:, type:, brackets:)
       super(parser)
       @table = table
       @name = name.to_s
       @type = type.to_sym
+      @brackets = brackets
 
       raise ArgumentError, "Unknown type: #{type}" unless %i(key_value tuple).include?(self.type)
     end
@@ -62,6 +63,14 @@ module Metadocs
       hash
     end
 
+    def full_name
+      (_, qualifier) = name_and_qualifier
+      full_name = name
+      full_name = "#{name}:#{qualifier}" if qualifier
+      full_name = "[#{full_name}]" if brackets
+      full_name
+    end
+
     protected
 
     def serialize_metadata
@@ -77,7 +86,16 @@ module Metadocs
     end
 
     def name_cell
-      rows[0].cells[0]
+      rows[0].cells[0].render(:text).gsub(/\s/, '')
+    end
+
+    def name_and_qualifier
+      @name_and_qualifier ||= begin
+        (cell_name, cell_qualifier) = name_cell.split(':')
+        cell_name = cell_name.delete('[]')
+        cell_qualifier = cell_qualifier.delete('[]') if cell_qualifier
+        [cell_name, cell_qualifier]
+      end
     end
 
     def parse_metadata
@@ -86,17 +104,10 @@ module Metadocs
         return nil
       end
 
-      # is_all_text = all_text?(name_cell)
-      # is_single_tag = single_tag?(name_cell)
-      # unless is_all_text || is_single_tag
-      #   @error = 'Title row can only have text elements or a single tag element'
-      #   return nil
-      # end
+      suspected_name, = name_and_qualifier
 
-      #row_name = is_all_text ? join_text(name_cell).strip : get_tag_name(name_cell)
-      row_name = name_cell.render(:text).strip
-      if ![name, "[#{name}]"].include?(row_name)
-        @error = "Expected name to be #{name}, but is #{row_name}"
+      if name != suspected_name
+        @error = "Expected name to be #{name}, but is #{suspected_name}"
         return nil
       end
 
@@ -177,7 +188,7 @@ module Metadocs
     end
 
     def single_tag?(cell)
-      cell.is_a?(Elements::Tag) || \
+      cell.is_a?(Elements::Tag) ||
         (cell.respond_to?(:children) &&
           cell.children.length == 1 &&
           cell.children.first.is_a?(Elements::Tag))
@@ -199,19 +210,6 @@ module Metadocs
 
     def get_tag_name(cell)
       cell.children[0].children[0].name
-    end
-
-    def full_name
-      row_name = if all_text?(name_cell)
-                   join_text(name_cell).strip
-                 else
-                   name_cell.children[0].children[0].full_name
-                 end
-      if row_name.start_with?('[')
-        row_name
-      else
-        "[#{row_name}]"
-      end
     end
   end
 end

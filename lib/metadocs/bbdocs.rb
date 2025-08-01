@@ -50,7 +50,7 @@ module Metadocs
               if char.match(/[a-zA-Z]/)
                 match["#{char.upcase}#{char.downcase}"]
               else
-                match[char]
+                str(char)
               end
             end
             .reduce(:>>)

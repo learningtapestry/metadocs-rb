@@ -18,7 +18,7 @@ module Metadocs
       table_rows = metadata_element.metadata.transform_values do |v|
         v.render(type)
       end.to_s
-      "#{metadata_element.name}\n#{table_rows}"
+      "#{metadata_element.full_name}\n#{table_rows}"
     end
 
     def render_paragraph
@@ -43,11 +43,11 @@ module Metadocs
           v.render(type)
         end.to_h
       end.to_s
-      "#{metadata_element.name}\n#{table_rows}"
+      "#{metadata_element.full_name}\n#{table_rows}"
     end
 
     def render_tag
-      element.name
+      element.full_name
     end
 
     def render_text

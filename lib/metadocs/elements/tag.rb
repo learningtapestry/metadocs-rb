@@ -36,12 +36,8 @@ module Metadocs
       end
 
       def full_name
-        f_name = qualifier ? "#{name}:#{qualifier}" : name
-        if f_name.start_with?('[')
-          f_name
-        else
-          "[#{f_name}]"
-        end
+        name_and_qualifier = qualifier ? "#{name}:#{qualifier}" : name
+        "[#{name_and_qualifier}]"
       end
     end
   end

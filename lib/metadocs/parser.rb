@@ -80,7 +80,6 @@ module Metadocs
       @bbdocs = Metadocs::Bbdocs.new(
         tags: tag_names,
         empty_tags: empty_tag_names + metadata_table_names
-        # ignore_tags: metadata_table_names
       )
 
       source_map.generate
@@ -125,7 +124,7 @@ module Metadocs
     end
 
     def metadata_table_names
-      @metadata_table_names ||= metadata_tables.map { |mtt| mtt[:name] }
+      @metadata_table_names ||= metadata_tables.map { |mtt| mtt[:name].delete('[]') }
     end
 
     def walk_ast(mapping, ast)
@@ -239,18 +238,20 @@ module Metadocs
           cell_bbdocs = Metadocs::Bbdocs.new(
             tags: tag_names,
             empty_tags: empty_tag_names + metadata_table_names
-            # ignore_tags: metadata_table_names
           )
           cell.children = walk_ast(cell_mapping, cell_bbdocs.parse(cell_mapping.source))
         end
       end
 
       metadata_tables.each do |mtt|
+        preserve_brackets = mtt[:name].start_with?('[')
+        metadata_table_name = mtt[:name].delete('[]')
         metadata_table = Elements::MetadataTable.new(
           self,
           table: table,
-          name: mtt[:name],
-          type: mtt[:type]
+          name: metadata_table_name,
+          type: mtt[:type],
+          brackets: preserve_brackets
         )
         next unless metadata_table.valid?
 
