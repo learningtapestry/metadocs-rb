@@ -5,7 +5,8 @@ require_relative 'element'
 module Metadocs
   module Elements
     class Text < Elements::Element
-      attr_accessor :value, :bold, :italic, :underline, :strikethrough
+      attr_accessor :value, :bold, :italic, :underline, :strikethrough,
+                    :paragraph_element
 
       def initialize(
         parser,
@@ -43,6 +44,10 @@ module Metadocs
 
       def strikethrough?
         strikethrough
+      end
+
+      def text_run
+        paragraph_element.text_run
       end
     end
   end

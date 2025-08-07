@@ -267,17 +267,17 @@ module Metadocs
       full_text = node[:text].str
       paragraphs = ranges.find_paragraphs(mapping.element, node[:text].offset, full_text)
       paragraphs.map do |(structural_element, paragraph_element, text)|
-        [
-          structural_element,
-          Elements::Text.new(
-            self,
-            value: text,
-            bold: paragraph_element.text_run.text_style.bold ? true : false,
-            italic: paragraph_element.text_run.text_style.italic ? true : false,
-            underline: paragraph_element.text_run.text_style.underline ? true : false,
-            strikethrough: paragraph_element.text_run.text_style.strikethrough ? true : false
-          )
-        ]
+        text_element = Elements::Text.new(
+          self,
+          value: text,
+          bold: paragraph_element.text_run.text_style.bold ? true : false,
+          italic: paragraph_element.text_run.text_style.italic ? true : false,
+          underline: paragraph_element.text_run.text_style.underline ? true : false,
+          strikethrough: paragraph_element.text_run.text_style.strikethrough ? true : false
+        )
+        text_element.structural_element = structural_element
+        text_element.paragraph_element = paragraph_element
+        [structural_element, text_element]
       end
     end
 
