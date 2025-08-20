@@ -14,20 +14,12 @@ module Metadocs
       @parser = parser
     end
 
-    def renderers
-      parser.renderers
-    end
+    def render(renderer_id = DEFAULT_RENDERER, render_options = {})
+      renderer = parser.renderer(renderer_id)
 
-    def render(renderer_type = DEFAULT_RENDERER, parser_options = {})
-      renderer = renderers[renderer_type]
-
-      self.renderer_instances ||= {}
-      self.renderer_instances[renderer_type] ||= renderer[:type].new(
-        renderer_type,
-        self,
-        {}.merge(renderer[:parser_options] || {}, parser_options)
-      )
-      self.renderer_instances[renderer_type].render
+      @renderer_instances ||= {}
+      @renderer_instances[renderer_id] ||= renderer.element_renderer(self)
+      @renderer_instances[renderer_id].render(render_options)
     end
 
     def to_h

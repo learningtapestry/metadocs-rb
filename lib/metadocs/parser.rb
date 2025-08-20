@@ -34,6 +34,10 @@ module Metadocs
       @metadata_tables = metadata_tables
       @images = {}
       @renderers = {}.merge(DEFAULT_RENDERERS).merge(renderers)
+      @renderer_instances = {}
+      @renderers.each do |renderer_id, renderer_def|
+        @renderer_instances[renderer_id] ||= renderer_def[:type].new(renderer_id, google_document)
+      end
 
       (google_document.inline_objects || []).each do |id, object|
         properties = object.inline_object_properties.embedded_object
@@ -95,8 +99,12 @@ module Metadocs
       raise ParserError.new("Error parsing document: #{e.message}", e)
     end
 
-    def render(type, parser_options = {})
-      body.render(type, parser_options.merge(root: true))
+    def render(renderer_id, render_options = {})
+      renderer(renderer_id).render(body, render_options)
+    end
+
+    def renderer(renderer_id)
+      @renderer_instances[renderer_id]
     end
 
     def each(&blk)
