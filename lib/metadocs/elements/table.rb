@@ -5,7 +5,7 @@ require_relative 'container_element'
 module Metadocs
   module Elements
     class Table < ContainerElement
-      attr_accessor :metadata_table
+      attr_accessor :table_element, :metadata_table
 
       def rows
         children

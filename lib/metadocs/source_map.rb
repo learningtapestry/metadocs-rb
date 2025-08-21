@@ -76,13 +76,13 @@ module Metadocs
           when :table
             struct_element.table.table_rows.each_with_index do |row, row_idx|
               row_cells = []
-              row.table_cells.each_with_index do |_cell, cell_idx|
+              row.table_cells.each_with_index do |cell, cell_idx|
                 cell_uuid = SecureRandom.hex(4)
-                row_cells << cell_uuid
+                row_cells << [cell, cell_uuid]
                 new_location = (location || []) + [[idx, row_idx, cell_idx]]
                 walk_content(cell_uuid, new_location)
               end
-              self[element_uuid][:table_rows] << row_cells
+              self[element_uuid][:table_rows] << [row, row_cells]
             end
           when :table_of_contents
             new_location = (location || []) + [[idx]]

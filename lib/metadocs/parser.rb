@@ -234,12 +234,15 @@ module Metadocs
 
     def parse_table_reference(_mapping, reference_mapping, _node)
       table = Elements::Table.new(self)
+      table.table_element = reference_mapping.structural_element.table
 
-      reference_mapping.table_rows.each do |cell_ids|
+      reference_mapping.table_rows.each do |(row_element, row_cells)|
         row = Elements::TableRow.new(self)
+        row.table_row_element = row_element
         table.rows << row
-        cell_ids.each do |cell_id|
+        row_cells.each do |(cell_element, cell_id)|
           cell = Elements::TableCell.new(self)
+          cell.table_cell_element = cell_element
           row.cells << cell
 
           cell_mapping = source_map[cell_id]

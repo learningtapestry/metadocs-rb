@@ -5,6 +5,7 @@ require_relative 'container_element'
 module Metadocs
   module Elements
     class TableCell < ContainerElement
+      attr_accessor :table_cell_element
     end
   end
 end
