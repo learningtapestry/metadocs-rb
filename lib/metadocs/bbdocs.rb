@@ -77,7 +77,7 @@ module Metadocs
         rule(:escaped_special) { str('\\') >> match(/[\[\]]/) }
 
         rule(:text) do
-          (ignore_tag | escaped_special | (text_special.absent? >> any)).repeat(1)
+          (ignore_tag | escaped_special | unknown_bracket | (text_special.absent? >> any)).repeat(1)
         end
 
         rule(:user_defined_tag) do
@@ -92,6 +92,23 @@ module Metadocs
             (space >> attribute).repeat.as(:attributes) >>
             space? >>
             str(']')
+        end
+
+        rule(:unknown_bracket) do
+          tag_defs = [
+            str('$:'),                                # reference
+            (space? >> str('/') >> user_defined_tag), # end tag
+            user_defined_tag                          # start or self-closing
+          ]
+          unless self.class::EMPTY_TAGS.empty?
+            tag_defs << (
+              space? >>
+              self.class::EMPTY_TAGS
+                .map { |t| stri(t) }.reduce(:|)
+            )
+          end
+          str('[') >> tag_defs.reduce(:|).absent? >>
+          (str(']').absent? >> any).repeat >> str(']').maybe
         end
 
         rule(:start_tag) do
