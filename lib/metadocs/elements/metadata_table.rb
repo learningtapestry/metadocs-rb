@@ -92,7 +92,9 @@ module Metadocs
     def name_and_qualifier
       @name_and_qualifier ||= begin
         (cell_name, cell_qualifier) = name_cell.split(':')
-        cell_name = cell_name.delete('[]')
+        cell_name = cell_name.to_s.delete('[]')
+        return ["", ""] if cell_name.empty?
+
         cell_qualifier = cell_qualifier.delete('[]') if cell_qualifier
         [cell_name, cell_qualifier]
       end
